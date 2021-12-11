@@ -14,6 +14,8 @@ const Drawer: React.FC<DrawerProps> = ({lineWidth, lineCap, strokeStyle}) => {
 
     const [isMouseClick, setMouseClock] = useState<boolean>(false);
 
+    const [startPosition, setStartPosition] = useState<{x : number, y : number} | null>(null)
+
     useEffect(()=>{
         if (!containerRef || !containerRef.current) return
        const resizeObserver = new ResizeObserver(() => {resizeCanvas()});
@@ -48,7 +50,7 @@ const Drawer: React.FC<DrawerProps> = ({lineWidth, lineCap, strokeStyle}) => {
     }, [canvasRef, containerRef])
 
     const handleMouseMove = (e : React.MouseEvent<HTMLDivElement>) => {
-        if (isMouseClick && canvasContext) {
+        if (isMouseClick && startPosition && canvasContext) {
                 
             canvasContext!.lineWidth = lineWidth;
             canvasContext!.lineCap = lineCap;
@@ -62,15 +64,25 @@ const Drawer: React.FC<DrawerProps> = ({lineWidth, lineCap, strokeStyle}) => {
     }
 
     const handleMouseDown = (e : React.MouseEvent<HTMLDivElement>) => {
+        setStartPosition({
+            x : e.pageX,
+            y : e.pageY,
+        });
         setMouseClock(true);
     }
     const handleMouseUp = (e : React.MouseEvent<HTMLDivElement>) => {
+        setStartPosition(null);
         setMouseClock(false);
         canvasContext?.beginPath()
     }
 
+    const onClear = () => {
+        canvasContext?.clearRect(0,0,canvasRef.current!.clientWidth,canvasRef.current!.clientHeight);
+    }
+
     return (
         <>
+            <button onClick={onClear} style={{position: 'absolute'}}>Clear</button>
             <div ref={containerRef} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove} className='canvas-container'>
                 <canvas ref={canvasRef} />
             </div>
