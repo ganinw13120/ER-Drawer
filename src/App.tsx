@@ -6,7 +6,7 @@ const App : React.FC = () => {
   return (
     <>
       <div className='app'>
-        <Drawer lineWidth={10} strokeStyle='red' lineCap='round'/>
+        <Drawer lineWidth={2} strokeStyle='gray' lineCap='round'/>
       </div>
     </>
   );

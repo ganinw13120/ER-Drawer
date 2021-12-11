@@ -6,15 +6,26 @@ type DrawerProps = {
     strokeStyle : string
 }
 
+type Position = {
+    x : number
+    y : number
+}
+
+type Path = {
+    startPosition : Position
+    stopPosition : Position
+    isFocus : boolean
+}
+
 const Drawer: React.FC<DrawerProps> = ({lineWidth, lineCap, strokeStyle}) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const [canvasContext, setCanvasContext] = useState<CanvasRenderingContext2D | null>(null);
 
-    const [isMouseClick, setMouseClock] = useState<boolean>(false);
+    const [isMouseClick, setMouseClick] = useState<boolean>(false);
 
-    const [startPosition, setStartPosition] = useState<{x : number, y : number} | null>(null)
+    const [paths, setPaths] = useState<Array<Path>>([]);
 
     useEffect(()=>{
         if (!containerRef || !containerRef.current) return
@@ -47,37 +58,67 @@ const Drawer: React.FC<DrawerProps> = ({lineWidth, lineCap, strokeStyle}) => {
 
         if (!context) return;
         setCanvasContext(context);
-    }, [canvasRef, containerRef])
+    }, [canvasRef, containerRef]);
+
+    useEffect(()=>{
+        if (!canvasContext) return;
+        canvasContext?.clearRect(0,0,canvasRef.current!.clientWidth,canvasRef.current!.clientHeight);
+        paths.forEach(e=>{
+            canvasContext.moveTo(e.startPosition.x, e.startPosition.y);
+            canvasContext.beginPath();
+            canvasContext.lineTo(e.startPosition.x, e.startPosition.y);
+            canvasContext.lineTo(e.stopPosition.x, e.stopPosition.y);
+            canvasContext.stroke();
+        })
+        canvasContext!.lineWidth = lineWidth;
+        canvasContext!.lineCap = lineCap;
+        canvasContext!.strokeStyle = strokeStyle;
+    }, [paths])
 
     const handleMouseMove = (e : React.MouseEvent<HTMLDivElement>) => {
-        if (isMouseClick && startPosition && canvasContext) {
-                
-            canvasContext!.lineWidth = lineWidth;
-            canvasContext!.lineCap = lineCap;
-            canvasContext!.strokeStyle = strokeStyle;
-
-            canvasContext?.lineTo(e.pageX, e.pageY)
-            canvasContext?.stroke()
-            canvasContext?.beginPath()
-            canvasContext?.moveTo(e.pageX, e.pageY)
+        if (isMouseClick && canvasContext) {
+            const position : Position = {
+                x : e.pageX,
+                y : e.pageY,
+            }
+            setPaths((p) => {
+                const temp = [...p];
+                temp.find(e=>e.isFocus)!.stopPosition = position;
+                return temp
+            })
         }
     }
 
     const handleMouseDown = (e : React.MouseEvent<HTMLDivElement>) => {
-        setStartPosition({
+        const position : Position = {
             x : e.pageX,
             y : e.pageY,
-        });
-        setMouseClock(true);
+        }
+        setPaths((p) => {
+            const temp = [...p];
+            temp.push({startPosition : position, stopPosition : position, isFocus : true})
+            return temp
+        })
+        setMouseClick(true);
     }
     const handleMouseUp = (e : React.MouseEvent<HTMLDivElement>) => {
-        setStartPosition(null);
-        setMouseClock(false);
-        canvasContext?.beginPath()
+        const position : Position = {
+            x : e.pageX,
+            y : e.pageY,
+        }
+        setPaths((p) => {
+            const temp = [...p];
+            if (!temp.find(e=>e.isFocus)) return temp;
+            temp.find(e=>e.isFocus)!.stopPosition = position;
+            temp.find(e=>e.isFocus)!.isFocus = false;
+            return temp
+        })
+        setMouseClick(false);
     }
 
     const onClear = () => {
         canvasContext?.clearRect(0,0,canvasRef.current!.clientWidth,canvasRef.current!.clientHeight);
+        setPaths([]);
     }
 
     return (
