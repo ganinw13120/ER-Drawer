@@ -39,6 +39,7 @@ const Drawer: React.FC<DrawerProps> = ({ lineWidth, lineCap, strokeStyle }) => {
         if (!canvas) return
         canvas.height = containerRef.current!.clientHeight;
         canvas.width = containerRef.current!.clientWidth;
+        renderPaths();
     }
 
     useEffect(() => {
@@ -56,11 +57,16 @@ const Drawer: React.FC<DrawerProps> = ({ lineWidth, lineCap, strokeStyle }) => {
         context!.lineCap = lineCap;
         context!.strokeStyle = strokeStyle;
 
+
         if (!context) return;
         setCanvasContext(context);
     }, [canvasRef, containerRef]);
 
     useEffect(() => {
+        renderPaths();
+    }, [paths])
+
+    const renderPaths = () => {
         if (!canvasContext) return;
         canvasContext?.clearRect(0, 0, canvasRef.current!.clientWidth, canvasRef.current!.clientHeight);
         paths.forEach(e => {
@@ -74,7 +80,7 @@ const Drawer: React.FC<DrawerProps> = ({ lineWidth, lineCap, strokeStyle }) => {
         canvasContext!.lineWidth = lineWidth;
         canvasContext!.lineCap = lineCap;
         canvasContext!.strokeStyle = strokeStyle;
-    }, [paths])
+    }
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (isMouseClick && canvasContext) {
@@ -139,7 +145,7 @@ const Drawer: React.FC<DrawerProps> = ({ lineWidth, lineCap, strokeStyle }) => {
         <>
             <button onClick={onClear} style={{ position: 'absolute' }}>Clear</button>
             <div ref={containerRef} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove} className='canvas-container'>
-                <canvas ref={canvasRef} />
+                <canvas ref={canvasRef}></canvas>
             </div>
         </>
     );
