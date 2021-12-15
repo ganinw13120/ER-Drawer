@@ -16,16 +16,34 @@ type Line = {
 
 type Box = {
     ref: React.RefObject<HTMLDivElement>
-    title: string
-    entities: Array<string>
+    title: BoxTitle
+    entities: Array<BoxEntity>
     isHover: boolean
-    pos : Position
+    pos: Position
+}
+
+type BoxTitle = {
+    text: string
+    ref: React.RefObject<HTMLDivElement>
+}
+
+type BoxEntity = {
+    text: string
+    ref: React.RefObject<HTMLDivElement>
 }
 
 enum HoverType {
     None,
-    Div, 
-    Svg
+    Div,
+    Svg,
+    Point
+}
+
+type Point = {
+    box : Box
+    ref : React.RefObject<SVGElement>
+    pos : Position
+    isHover : boolean
 }
 
 const Drawer: React.FC<DrawerProps> = () => {
@@ -36,6 +54,8 @@ const Drawer: React.FC<DrawerProps> = () => {
 
     const [lines, setLines] = useState<Array<Line>>([]);
 
+    const [points, setPoints] = useState<Array<Point>>([]);
+
     const [boxes, setBoxes] = useState<Array<Box>>([]);
 
     const [hoverType, setHoverType] = useState<HoverType>(HoverType.None);
@@ -44,20 +64,35 @@ const Drawer: React.FC<DrawerProps> = () => {
 
     useEffect(() => {
         const ref = React.createRef<HTMLDivElement>();
+        const refTitle = React.createRef<HTMLDivElement>();
+        const refEntity1 = React.createRef<HTMLDivElement>();
+        const refEntity2 = React.createRef<HTMLDivElement>();
         const testBoxes: Array<Box> = [
             {
                 ref: ref,
-                title: "test",
-                entities: ['Test1', 'Test2'],
+                title: {
+                    text: 'asd',
+                    ref: refTitle
+                },
+                entities: [
+                    {
+                        text: 'test1',
+                        ref: refEntity1,
+                    },
+                    {
+                        text: 'test2',
+                        ref: refEntity2,
+                    }
+                ],
                 isHover: false,
-                pos : {
-                    x : 0,
-                    y : 0
+                pos: {
+                    x: 0,
+                    y: 0
                 }
             },
         ];
         setBoxes(testBoxes);
-    }, [])
+    }, []);
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!isMouseClick) return;
@@ -65,24 +100,24 @@ const Drawer: React.FC<DrawerProps> = () => {
             x: e.pageX,
             y: e.pageY
         }
-        if (hoverType===HoverType.Div) {
-            const box = boxes.find(e=>e.isHover);
+        if (hoverType === HoverType.Div) {
+            const box = boxes.find(e => e.isHover);
             if (!box || !pivotPosition) {
                 console.log('error while finding draging box');
                 return;
             }
-            const newPos : Position = {
-                x : box.pos.x + (current.x - pivotPosition.x),
-                y : box.pos.y + (current.y - pivotPosition.y)
+            const newPos: Position = {
+                x: box.pos.x + (current.x - pivotPosition.x),
+                y: box.pos.y + (current.y - pivotPosition.y)
             }
             setPivotPosition(current);
-            setBoxes(prev=>{
+            setBoxes(prev => {
                 const temp = [...prev];
-                temp.find(e=>e.isHover)!.pos = newPos;
+                temp.find(e => e.isHover)!.pos = newPos;
                 return temp;
             })
         }
-        else if (hoverType===HoverType.Svg) {
+        else if (hoverType === HoverType.Svg) {
             setLines(prev => {
                 const temp = [...prev];
                 if (!temp.find(e => e.isFocus)) return temp;
@@ -97,7 +132,7 @@ const Drawer: React.FC<DrawerProps> = () => {
             x: e.pageX,
             y: e.pageY
         }
-        if (boxes.find(e=>e.isHover)) {
+        if (boxes.find(e => e.isHover)) {
             setHoverType(HoverType.Div);
             setPivotPosition(current);
         }
@@ -146,27 +181,116 @@ const Drawer: React.FC<DrawerProps> = () => {
         return <path d={path} stroke="black" fill="transparent" stroke-width="2" />
     }
 
+    const generatePointElement = (): ReactElement[] => {
+        const _points: ReactElement[] = [];
+        points.forEach((e, key) => {
+            _points.push(generatePoint(e.pos, key));
+        })
+        return _points;
+    }
+
+    const generatePoint = (pos: Position, key : number): ReactElement => {
+        const pointR = 2.5;
+        return <React.Fragment key={key}>
+            <svg onMouseEnter={()=>{onHoverPoint(key)}} onMouseLeave={()=>{onUnHoverPoint(key)}} key={key} style={{cursor : 'pointer', position: 'absolute', top: 0, zIndex: 10, width: `${pointR * 4}px`, height: `${pointR * 4}px`, transform: `translate(${pos.x - (pointR * 2)}px, ${pos.y + (pointR * 2)}px)` }}>
+                <circle cx={pointR * 2} cy={pointR * 2} r={pointR * 2} fill="red" />
+            </svg>
+        </React.Fragment>
+    }
+
     const onClear = () => {
         setLines([]);
     }
 
-    const onHoverDiv = (key : number) => {
+    const onHoverDiv = (key: number) => {
         if (isMouseClick) return;
-        setBoxes(prev=>{
+        setBoxes(prev => {
             const temp = [...prev];
             temp[key].isHover = true;
             return temp;
         })
     }
 
-    const onUnHoverDiv = (key : number) => {
+    const onUnHoverDiv = (key: number) => {
         if (isMouseClick) return;
-        setBoxes(prev=>{
+        setBoxes(prev => {
             const temp = [...prev];
             temp[key].isHover = false;
             return temp;
         })
     }
+
+    const onHoverPoint = (key : number) => {
+        setPoints(prev=>{
+            const temp = [...prev];
+            temp[key].isHover=true;
+            return temp;
+        })
+    } 
+
+    const onUnHoverPoint = (key : number) => {
+        setPoints(prev=>{
+            const temp = [...prev];
+            temp[key].isHover=false;
+            return temp;
+        })
+    }
+
+    useEffect(()=>{
+        console.log(points.map(v=>v.isHover))
+    }, [points])
+
+    useEffect(() => {
+        const _points: Array<Point> = [];
+        boxes.filter(e=>e.isHover).forEach(e => {
+            const TitleL = React.createRef<SVGElement>();
+            const TitleR = React.createRef<SVGElement>();
+            _points.push({
+                isHover : false,
+                ref : TitleL,
+                box : e,
+                pos : {
+                    x: 0,
+                    y: e.title.ref.current!.clientHeight / 2,
+                }
+            })
+            _points.push({
+                isHover : false,
+                ref : TitleR,
+                box : e,
+                pos : {
+                    x: e.title.ref.current!.offsetWidth,
+                    y: e.title.ref.current!.offsetHeight / 2,
+                }
+            })
+            let sum = e.title.ref.current!.offsetHeight;
+            e.entities.forEach(en => {
+                const L = React.createRef<SVGElement>();
+                const R = React.createRef<SVGElement>();
+                _points.push({
+                    isHover : false,
+                    ref : L,
+                    box : e,
+                    pos : {
+                        x: 0,
+                        y: ( en.ref.current!.clientHeight / 2) + sum,
+                    }
+                })
+                _points.push({
+                    isHover : false,
+                    ref : R,
+                    box : e,
+                    pos : {
+                        x: en.ref.current!.offsetWidth,
+                        y: ( en.ref.current!.clientHeight / 2) + sum,
+                    }
+                })
+                sum += en.ref.current!.clientHeight;
+            })
+        })
+        setPoints(_points);
+    }, [boxes])
+
     return (
         <>
             <button onClick={onClear} style={{ position: 'absolute' }}>Clear</button>
@@ -174,10 +298,10 @@ const Drawer: React.FC<DrawerProps> = () => {
                 {(() => {
                     let _boxes: Array<ReactElement> = [];
                     boxes.forEach((e, key) => {
-                        _boxes.push(<>
+                        _boxes.push(<React.Fragment key={key}>
                             <div className='box'
                                 style={{
-                                    transform : `translate(${boxes[key].pos.x}px, ${boxes[key].pos.y}px)`,
+                                    transform: `translate(${boxes[key].pos.x}px, ${boxes[key].pos.y}px)`,
                                     // transition : 'all 0.01s'
                                 }}
                                 ref={boxes[key].ref}
@@ -188,26 +312,29 @@ const Drawer: React.FC<DrawerProps> = () => {
                                     onUnHoverDiv(key);
                                 }}
                             >
-                                <div className='box-header'>
-                                    {e.title}
+                                <div className='box-inner-container'>
+                                    <div className='box-header' ref={e.title.ref}>
+                                        {e.title.text}
+                                    </div>
+                                    {(() => {
+                                        const details: Array<ReactElement> = [];
+                                        e.entities.forEach((entity, key) => {
+                                            details.push(<React.Fragment key={key}>
+                                                <div className='box-detail' ref={entity.ref}>
+                                                    {entity.text}
+                                                </div>
+                                            </React.Fragment>)
+                                        })
+                                        return details;
+                                    })()}
                                 </div>
-                                {(() => {
-                                    const details: Array<ReactElement> = [];
-                                    e.entities.forEach(entity => {
-                                        details.push(<>
-                                            <div className='box-detail'>
-                                                {entity}
-                                            </div>
-                                        </>)
-                                    })
-                                    return details;
-                                })()}
+                                {generatePointElement()}
                             </div>
-                        </>)
+                        </React.Fragment>)
                     })
                     return _boxes;
                 })()}
-                <svg style={{ width: '100%', height: '100%' }}>
+                <svg style={{ width: '100%', height: '100%', top: 0 }} >
                     <g>
                         {generateLineElement()}
                     </g>
