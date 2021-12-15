@@ -9,3 +9,26 @@
   width: 100%;
   position: absolute;
 }
+
+.box {
+  background-color: white;
+  border: 1px solid #1C6EA4;
+  position: absolute;
+  margin : 10px;
+}
+
+.box:hover {
+  background-color: #f0efef;
+  cursor: grab;
+}
+
+.box-header {
+  padding : 10px;
+  padding-left : 60px;
+  padding-right : 60px;
+  background-color: #e2e0e0;
+}
+.box-detail {
+  border-top : 1px solid #1C6EA4;
+  padding : 10px;
+}
