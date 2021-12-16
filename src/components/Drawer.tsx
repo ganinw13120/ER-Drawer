@@ -134,10 +134,16 @@ const Drawer: React.FC<DrawerProps> = () => {
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!isMouseClick) return;
-        const current: Position = {
+        let current: Position = {
             x: e.pageX,
             y: e.pageY
         }
+        let currentRef : React.RefObject<HTMLDivElement> | React.RefObject<SVGSVGElement> | null = null;
+        if (points.find(e=>e.isHover)) {
+            currentRef = points.find(e=>e.isHover)!.ref 
+            current = parseClientRectsToPosition(currentRef.current!.getClientRects()[0]);
+        }
+
         if (focusType === FocusType.Div) {
             if (!dragingBox || !pivotPosition) {
                 return console.log('Error!');
@@ -157,7 +163,14 @@ const Drawer: React.FC<DrawerProps> = () => {
             setLines(prev => {
                 const temp = [...prev];
                 if (!temp.find(e => e.isFocus)) return temp;
-                temp.find(e => e.isFocus)!.stopPosition = current;
+                if (currentRef) {
+                    temp.find(e => e.isFocus)!.stopPosition = undefined;
+                    temp.find(e => e.isFocus)!.stopRef = currentRef;
+                }
+                else {
+                    temp.find(e => e.isFocus)!.stopPosition = current;
+                    temp.find(e => e.isFocus)!.stopRef = undefined;
+                }
                 return temp;
             })
         }
@@ -165,7 +178,14 @@ const Drawer: React.FC<DrawerProps> = () => {
             setLines(prev => {
                 const temp = [...prev];
                 if (!temp.find(e => e.isFocus)) return temp;
-                temp.find(e => e.isFocus)!.stopPosition = current;
+                if (currentRef) {
+                    temp.find(e => e.isFocus)!.stopPosition = undefined;
+                    temp.find(e => e.isFocus)!.stopRef = currentRef;
+                }
+                else {
+                    temp.find(e => e.isFocus)!.stopPosition = current;
+                    temp.find(e => e.isFocus)!.stopRef = undefined;
+                }
                 return temp;
             })
         }
@@ -226,6 +246,8 @@ const Drawer: React.FC<DrawerProps> = () => {
             const stopPos = e.stopRef?.current ? parseClientRectsToPosition(e.stopRef.current!.getClientRects()[0]) : e.stopPosition!
             // const startPos = e.startPosition!;
             // const stopPos = e.stopPosition!;
+
+            console.log(e)
 
             const middlePositionStart: Position = {
                 x: (startPos.x + stopPos.x) / 2,
