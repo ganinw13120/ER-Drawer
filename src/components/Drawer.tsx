@@ -77,6 +77,8 @@ const Drawer: React.FC<DrawerProps> = () => {
 
     const [focusType, setFocusType] = useState<FocusType>(FocusType.None);
 
+    const [dragingBox, setDragingBox] = useState<Box|null>(null);
+
     const [pivotPosition, setPivotPosition] = useState<Position | null>(null);
 
     useEffect(() => {
@@ -137,19 +139,17 @@ const Drawer: React.FC<DrawerProps> = () => {
             y: e.pageY
         }
         if (focusType === FocusType.Div) {
-            const box = boxes.find(e => e.isHover);
-            if (!box || !pivotPosition) {
-                console.log('error while finding draging box');
-                return;
+            if (!dragingBox || !pivotPosition) {
+                return console.log('Error!');
             }
             const newPos: Position = {
-                x: box.pos.x + (current.x - pivotPosition.x),
-                y: box.pos.y + (current.y - pivotPosition.y)
+                x: dragingBox.pos.x + (current.x - pivotPosition.x),
+                y: dragingBox.pos.y + (current.y - pivotPosition.y)
             }
             setPivotPosition(current);
             setBoxes(prev => {
                 const temp = [...prev];
-                temp.find(e => e.isHover)!.pos = newPos;
+                temp.find(e => e.uuid===dragingBox.uuid)!.pos = newPos;
                 return temp;
             })
         }
@@ -190,6 +190,7 @@ const Drawer: React.FC<DrawerProps> = () => {
             })
         } else if (boxes.find(e => e.isHover)) {
             setFocusType(FocusType.Div);
+            setDragingBox(boxes.find(e => e.isHover)!);
             setPivotPosition(current);
         }
         else {
@@ -265,7 +266,6 @@ const Drawer: React.FC<DrawerProps> = () => {
     }
 
     const onHoverDiv = (key: number) => {
-        if (isMouseClick) return;
         setBoxes(prev => {
             const temp = [...prev];
             temp[key].isHover = true;
@@ -282,7 +282,6 @@ const Drawer: React.FC<DrawerProps> = () => {
     }
 
     const onHoverPoint = (key: string) => {
-        if (isMouseClick) return;
         setPoints(prev => {
             let temp = [...prev];
             temp.find(e=>e.uuid===key)!.isHover = true;
