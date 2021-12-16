@@ -4,8 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 const parseClientRectsToPosition = (val : DOMRect) : Position => {
     return {
-        x : val.x + 5,
-        y : val.y + 5
+        x : val.x + 10,
+        y : val.y + 10
     }
 }
 
@@ -244,10 +244,6 @@ const Drawer: React.FC<DrawerProps> = () => {
         lines.forEach(e => {
             const startPos = e.startRef?.current ? parseClientRectsToPosition(e.startRef.current!.getClientRects()[0]) : e.startPosition!
             const stopPos = e.stopRef?.current ? parseClientRectsToPosition(e.stopRef.current!.getClientRects()[0]) : e.stopPosition!
-            // const startPos = e.startPosition!;
-            // const stopPos = e.stopPosition!;
-
-            console.log(e)
 
             const middlePositionStart: Position = {
                 x: (startPos.x + stopPos.x) / 2,
@@ -277,8 +273,8 @@ const Drawer: React.FC<DrawerProps> = () => {
     const generatePoint = (pos: Point, key: number): ReactElement => {
         const pointR = 2.5;
         return <React.Fragment key={pos.uuid}>
-            <svg ref={pos.ref} onMouseEnter={() => { onHoverPoint(pos.uuid) }} onMouseLeave={() => { onUnHoverPoint(pos.uuid) }} key={pos.uuid} style={{ cursor: 'pointer', position: 'absolute', top: 0, zIndex: 10, width: `${pointR * 4}px`, height: `${pointR * 4}px`, transform: `translate(${pos.pos.x - (pointR * 2)}px, ${pos.pos.y + (pointR * 2)}px)` }}>
-             {pos.isShow && <circle cx={pointR * 2} cy={pointR * 2} r={pointR * 2} fill="red" />}
+            <svg ref={pos.ref} onMouseEnter={() => { onHoverPoint(pos.uuid) }} onMouseLeave={() => { onUnHoverPoint(pos.uuid) }} key={pos.uuid} style={{ cursor: 'pointer', position: 'absolute', top: 0, zIndex: 10, width: `${pointR * 8}px`, height: `${pointR * 8}px`, transform: `translate(${pos.pos.x - (pointR * 4)}px, ${pos.pos.y + (pointR )}px)` }}>
+             {pos.isHover && <circle cx={pointR * 4} cy={pointR * 4} r={pointR * 2} fill="#d99a9a" />}
             </svg>
         </React.Fragment>
     }
