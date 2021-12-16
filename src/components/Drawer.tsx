@@ -1,4 +1,16 @@
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+// Utils    
+
+const parseClientRectsToPosition = (val : DOMRect) : Position => {
+    return {
+        x : val.x + 5,
+        y : val.y + 5
+    }
+}
+
+//
+
 
 type DrawerProps = {
 }
@@ -9,12 +21,15 @@ type Position = {
 }
 
 type Line = {
-    startPosition: Position
-    stopPosition: Position
+    startRef?: React.RefObject<HTMLDivElement> | React.RefObject<SVGSVGElement>
+    startPosition?: Position
+    stopRef?: React.RefObject<HTMLDivElement> | React.RefObject<SVGSVGElement>
+    stopPosition?: Position
     isFocus: boolean
 }
 
 type Box = {
+    uuid : string
     ref: React.RefObject<HTMLDivElement>
     title: BoxTitle
     entities: Array<BoxEntity>
@@ -32,7 +47,7 @@ type BoxEntity = {
     ref: React.RefObject<HTMLDivElement>
 }
 
-enum HoverType {
+enum FocusType {
     None,
     Div,
     Svg,
@@ -40,10 +55,12 @@ enum HoverType {
 }
 
 type Point = {
-    box : Box
-    ref : React.RefObject<SVGElement>
-    pos : Position
-    isHover : boolean
+    uuid : string
+    boxId: string
+    ref: React.RefObject<SVGSVGElement>
+    pos: Position
+    isHover: boolean
+    isShow : boolean
 }
 
 const Drawer: React.FC<DrawerProps> = () => {
@@ -58,7 +75,7 @@ const Drawer: React.FC<DrawerProps> = () => {
 
     const [boxes, setBoxes] = useState<Array<Box>>([]);
 
-    const [hoverType, setHoverType] = useState<HoverType>(HoverType.None);
+    const [focusType, setFocusType] = useState<FocusType>(FocusType.None);
 
     const [pivotPosition, setPivotPosition] = useState<Position | null>(null);
 
@@ -66,10 +83,14 @@ const Drawer: React.FC<DrawerProps> = () => {
         const ref = React.createRef<HTMLDivElement>();
         const refTitle = React.createRef<HTMLDivElement>();
         const refEntity1 = React.createRef<HTMLDivElement>();
-        const refEntity2 = React.createRef<HTMLDivElement>();
+        
+        const ref_2 = React.createRef<HTMLDivElement>();
+        const refTitle_2 = React.createRef<HTMLDivElement>();
+        const refEntity1_2 = React.createRef<HTMLDivElement>();
         const testBoxes: Array<Box> = [
             {
                 ref: ref,
+                uuid : uuidv4(),
                 title: {
                     text: 'asd',
                     ref: refTitle
@@ -79,10 +100,25 @@ const Drawer: React.FC<DrawerProps> = () => {
                         text: 'test1',
                         ref: refEntity1,
                     },
+                ],
+                isHover: false,
+                pos: {
+                    x: 0,
+                    y: 0
+                }
+            },
+            {
+                ref: ref_2,
+                uuid : uuidv4(),
+                title: {
+                    text: 'asd',
+                    ref: refTitle_2
+                },
+                entities: [
                     {
-                        text: 'test2',
-                        ref: refEntity2,
-                    }
+                        text: 'test1',
+                        ref: refEntity1_2,
+                    },
                 ],
                 isHover: false,
                 pos: {
@@ -100,7 +136,7 @@ const Drawer: React.FC<DrawerProps> = () => {
             x: e.pageX,
             y: e.pageY
         }
-        if (hoverType === HoverType.Div) {
+        if (focusType === FocusType.Div) {
             const box = boxes.find(e => e.isHover);
             if (!box || !pivotPosition) {
                 console.log('error while finding draging box');
@@ -117,7 +153,15 @@ const Drawer: React.FC<DrawerProps> = () => {
                 return temp;
             })
         }
-        else if (hoverType === HoverType.Svg) {
+        else if (focusType === FocusType.Point) {
+            setLines(prev => {
+                const temp = [...prev];
+                if (!temp.find(e => e.isFocus)) return temp;
+                temp.find(e => e.isFocus)!.stopPosition = current;
+                return temp;
+            })
+        }
+        else if (focusType === FocusType.Svg) {
             setLines(prev => {
                 const temp = [...prev];
                 if (!temp.find(e => e.isFocus)) return temp;
@@ -132,12 +176,24 @@ const Drawer: React.FC<DrawerProps> = () => {
             x: e.pageX,
             y: e.pageY
         }
-        if (boxes.find(e => e.isHover)) {
-            setHoverType(HoverType.Div);
+        if (points.find(e=>e.isHover)) {
+            setFocusType(FocusType.Point);
+            setLines(prev => {
+                const temp = [...prev];
+                const line: Line = {
+                    startRef: points.find(e=>e.isHover)!.ref,
+                    stopPosition: current,
+                    isFocus: true
+                }
+                temp.push(line)
+                return temp;
+            })
+        } else if (boxes.find(e => e.isHover)) {
+            setFocusType(FocusType.Div);
             setPivotPosition(current);
         }
         else {
-            setHoverType(HoverType.Svg);
+            setFocusType(FocusType.Svg);
             setLines(prev => {
                 const temp = [...prev];
                 const line: Line = {
@@ -163,37 +219,43 @@ const Drawer: React.FC<DrawerProps> = () => {
 
     const generateLineElement = (): ReactElement[] => {
         let list: ReactElement[] = [];
+
         lines.forEach(e => {
+            const startPos = e.startRef?.current ? parseClientRectsToPosition(e.startRef.current!.getClientRects()[0]) : e.startPosition!
+            const stopPos = e.stopRef?.current ? parseClientRectsToPosition(e.stopRef.current!.getClientRects()[0]) : e.stopPosition!
+            // const startPos = e.startPosition!;
+            // const stopPos = e.stopPosition!;
+
             const middlePositionStart: Position = {
-                x: (e.startPosition.x + e.stopPosition.x) / 2,
-                y: e.startPosition.y,
+                x: (startPos.x + stopPos.x) / 2,
+                y: startPos.y,
             }
             const middlePositionStop: Position = {
-                x: (e.startPosition.x + e.stopPosition.x) / 2,
-                y: e.stopPosition.y,
+                x: (startPos.x + stopPos.x) / 2,
+                y: stopPos.y,
             }
-            list.push(generateSvgLine(`M ${e.startPosition.x} ${e.startPosition.y}, ${middlePositionStart.x} ${middlePositionStart.y},${middlePositionStop.x}, ${middlePositionStop.y}  , ${e.stopPosition.x} ${e.stopPosition.y}`))
+            list.push(generateSvgLine(`M ${startPos.x} ${startPos.y}, ${middlePositionStart.x} ${startPos.y},${middlePositionStop.x}, ${middlePositionStop.y}  , ${stopPos.x} ${stopPos.y}`))
         })
         return list;
     }
 
     const generateSvgLine = (path: string): ReactElement => {
-        return <path d={path} stroke="black" fill="transparent" stroke-width="2" />
+        return <path d={path} stroke="black" fill="transparent" strokeWidth="2" />
     }
 
-    const generatePointElement = (): ReactElement[] => {
+    const generatePointElement = (key : string): ReactElement[] => {
         const _points: ReactElement[] = [];
-        points.forEach((e, key) => {
-            _points.push(generatePoint(e.pos, key));
+        points.filter(e=>e.boxId===key).forEach((e, key) => {
+            _points.push(generatePoint(e, key));
         })
         return _points;
     }
 
-    const generatePoint = (pos: Position, key : number): ReactElement => {
+    const generatePoint = (pos: Point, key: number): ReactElement => {
         const pointR = 2.5;
-        return <React.Fragment key={key}>
-            <svg onMouseEnter={()=>{onHoverPoint(key)}} onMouseLeave={()=>{onUnHoverPoint(key)}} key={key} style={{cursor : 'pointer', position: 'absolute', top: 0, zIndex: 10, width: `${pointR * 4}px`, height: `${pointR * 4}px`, transform: `translate(${pos.x - (pointR * 2)}px, ${pos.y + (pointR * 2)}px)` }}>
-                <circle cx={pointR * 2} cy={pointR * 2} r={pointR * 2} fill="red" />
+        return <React.Fragment key={pos.uuid}>
+            <svg ref={pos.ref} onMouseEnter={() => { onHoverPoint(pos.uuid) }} onMouseLeave={() => { onUnHoverPoint(pos.uuid) }} key={pos.uuid} style={{ cursor: 'pointer', position: 'absolute', top: 0, zIndex: 10, width: `${pointR * 4}px`, height: `${pointR * 4}px`, transform: `translate(${pos.pos.x - (pointR * 2)}px, ${pos.pos.y + (pointR * 2)}px)` }}>
+             {pos.isShow && <circle cx={pointR * 2} cy={pointR * 2} r={pointR * 2} fill="red" />}
             </svg>
         </React.Fragment>
     }
@@ -212,7 +274,6 @@ const Drawer: React.FC<DrawerProps> = () => {
     }
 
     const onUnHoverDiv = (key: number) => {
-        if (isMouseClick) return;
         setBoxes(prev => {
             const temp = [...prev];
             temp[key].isHover = false;
@@ -220,76 +281,91 @@ const Drawer: React.FC<DrawerProps> = () => {
         })
     }
 
-    const onHoverPoint = (key : number) => {
-        setPoints(prev=>{
-            const temp = [...prev];
-            temp[key].isHover=true;
+    const onHoverPoint = (key: string) => {
+        if (isMouseClick) return;
+        setPoints(prev => {
+            let temp = [...prev];
+            temp.find(e=>e.uuid===key)!.isHover = true;
             return temp;
         })
-    } 
+    }
 
-    const onUnHoverPoint = (key : number) => {
-        setPoints(prev=>{
-            const temp = [...prev];
-            temp[key].isHover=false;
+    const onUnHoverPoint = (key: string) => {
+        setPoints(prev => {
+            let temp = [...prev];
+            temp.find(e=>e.uuid===key)!.isHover = false;
             return temp;
         })
     }
 
     useEffect(()=>{
-        console.log(points.map(v=>v.isHover))
-    }, [points])
+        setPoints(prev=>{
+            const temp = [...prev];
+            temp.forEach(e=>{
+                e.isShow = (boxes.find(_e=>_e.uuid===e.boxId)!.isHover);
+            })
+            return temp;
+        })
+    }, [boxes])
 
     useEffect(() => {
         const _points: Array<Point> = [];
-        boxes.filter(e=>e.isHover).forEach(e => {
-            const TitleL = React.createRef<SVGElement>();
-            const TitleR = React.createRef<SVGElement>();
+        boxes.forEach(e => {
+            const TitleL = React.createRef<SVGSVGElement>();
+            const TitleR = React.createRef<SVGSVGElement>();
             _points.push({
-                isHover : false,
-                ref : TitleL,
-                box : e,
-                pos : {
+                uuid : uuidv4(),
+                isHover: false,
+                isShow : false,
+                ref: TitleL,
+                boxId : e.uuid,
+                pos: {
                     x: 0,
                     y: e.title.ref.current!.clientHeight / 2,
                 }
             })
             _points.push({
-                isHover : false,
-                ref : TitleR,
-                box : e,
-                pos : {
+                uuid : uuidv4(),
+                isHover: false,
+                isShow : false,
+                ref: TitleR,
+                boxId : e.uuid,
+                pos: {
                     x: e.title.ref.current!.offsetWidth,
                     y: e.title.ref.current!.offsetHeight / 2,
                 }
             })
             let sum = e.title.ref.current!.offsetHeight;
             e.entities.forEach(en => {
-                const L = React.createRef<SVGElement>();
-                const R = React.createRef<SVGElement>();
+                const L = React.createRef<SVGSVGElement>();
+                const R = React.createRef<SVGSVGElement>();
                 _points.push({
-                    isHover : false,
-                    ref : L,
-                    box : e,
-                    pos : {
+                    uuid : uuidv4(),
+                    isHover: false,
+                    isShow : false,
+                    ref: L,
+                    boxId : e.uuid,
+                    pos: {
                         x: 0,
-                        y: ( en.ref.current!.clientHeight / 2) + sum,
+                        y: (en.ref.current!.clientHeight / 2) + sum,
                     }
                 })
                 _points.push({
-                    isHover : false,
-                    ref : R,
-                    box : e,
-                    pos : {
+                    uuid : uuidv4(),
+                    isHover: false,
+                    isShow : false,
+                    ref: R,
+                    boxId : e.uuid,
+                    pos: {
                         x: en.ref.current!.offsetWidth,
-                        y: ( en.ref.current!.clientHeight / 2) + sum,
+                        y: (en.ref.current!.clientHeight / 2) + sum,
                     }
                 })
                 sum += en.ref.current!.clientHeight;
             })
         })
         setPoints(_points);
-    }, [boxes])
+    }, [boxes.length]);
 
     return (
         <>
@@ -328,7 +404,7 @@ const Drawer: React.FC<DrawerProps> = () => {
                                         return details;
                                     })()}
                                 </div>
-                                {generatePointElement()}
+                                {generatePointElement(e.uuid)}
                             </div>
                         </React.Fragment>)
                     })
