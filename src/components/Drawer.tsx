@@ -1,5 +1,8 @@
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { Position, DrawerProps, Box, Line, Point, FocusType } from '../model/Drawer';
+import BoxComponent from './Box';
+// import Box from './Box';
 
 // Utils    
 
@@ -12,59 +15,6 @@ const parseClientRectsToPosition = (val: DOMRect): Position => {
 
 //
 
-
-type DrawerProps = {
-}
-
-type Position = {
-    x: number
-    y: number
-}
-
-type Line = {
-    startRef?: React.RefObject<HTMLDivElement> | React.RefObject<SVGSVGElement>
-    startPosition?: Position
-    stopRef?: React.RefObject<HTMLDivElement> | React.RefObject<SVGSVGElement>
-    stopPosition?: Position
-    isFocus: boolean
-}
-
-type Box = {
-    uuid: string
-    ref: React.RefObject<HTMLDivElement>
-    title: BoxTitle
-    entities: Array<BoxEntity>
-    isSelect: boolean
-    isHover: boolean
-    isDragging: boolean
-    pos: Position
-}
-
-type BoxTitle = {
-    text: string
-    ref: React.RefObject<HTMLDivElement>
-}
-
-type BoxEntity = {
-    text: string
-    ref: React.RefObject<HTMLDivElement>
-}
-
-enum FocusType {
-    None,
-    Div,
-    Svg,
-    Point
-}
-
-type Point = {
-    uuid: string
-    boxId: string
-    ref: React.RefObject<SVGSVGElement>
-    pos: Position
-    isHover: boolean
-    isShow: boolean
-}
 
 const Drawer: React.FC<DrawerProps> = () => {
 
@@ -426,37 +376,14 @@ const Drawer: React.FC<DrawerProps> = () => {
                 {(() => {
                     let _boxes: Array<ReactElement> = [];
                     boxes.forEach((e, key) => {
+                        const _onHoverDiv = () => {
+                            onHoverDiv(key);
+                        }
+                        const _onUnHoverDiv = () => {
+                            onUnHoverDiv(key);
+                        }
                         _boxes.push(<React.Fragment key={key}>
-                            <div className={`box`}
-                                style={{
-                                    transform: `translate(${boxes[key].pos.x}px, ${boxes[key].pos.y}px)`,
-                                }}
-                                ref={boxes[key].ref}
-                                onMouseEnter={() => {
-                                    onHoverDiv(key);
-                                }}
-                                onMouseLeave={() => {
-                                    onUnHoverDiv(key);
-                                }}
-                            >
-                                <div className={`box-inner-container ${e.isSelect && !e.isDragging ? 'box-select' : ''} ${e.isDragging ? 'box-dragging' : ''} `}>
-                                    <div className='box-header' ref={e.title.ref}>
-                                        {e.title.text}
-                                    </div>
-                                    {(() => {
-                                        const details: Array<ReactElement> = [];
-                                        e.entities.forEach((entity, key) => {
-                                            details.push(<React.Fragment key={key}>
-                                                <div className='box-detail' ref={entity.ref}>
-                                                    {entity.text}
-                                                </div>
-                                            </React.Fragment>)
-                                        })
-                                        return details;
-                                    })()}
-                                </div>
-                                {generatePointElement(e.uuid)}
-                            </div>
+                            <BoxComponent data={e} onHoverDiv={_onHoverDiv} onUnHoverDiv={_onUnHoverDiv} />
                         </React.Fragment>)
                     })
                     return _boxes;
