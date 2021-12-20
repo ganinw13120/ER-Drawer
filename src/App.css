@@ -18,7 +18,7 @@
 }
 
 .box-inner-container {
-  border : 1px solid #1C6EA4;
+  border : 1px solid #5A5A5A;
   background-color: white;
 }
 .box-inner-container:hover {
@@ -32,11 +32,18 @@
   background-color: #e2e0e0;
 }
 .box-detail {
-  border-top : 1px solid #1C6EA4;
+  border-top : 1px solid #5A5A5A;
   top : 0;
   padding : 10px;
 }
 .box-detail-container {
   position: relative;
   height: 100px;
+}
+
+.box-dragging {
+  border : 1px solid #364655;
+}
+.box-select {
+  border :1px solid #007EF3;
 }
