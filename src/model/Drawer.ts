@@ -19,10 +19,15 @@ export type Box = {
     ref: React.RefObject<HTMLDivElement>
     title: BoxTitle
     entities: Array<BoxEntity>
+    state: BoxState
+}
+
+export type BoxState = {
     isSelect: boolean
     isHover: boolean
     isDragging: boolean
     pos: Position
+    pointAiming?: Point
 }
 
 export type BoxTitle = {
@@ -35,18 +40,18 @@ export type BoxEntity = {
     ref: React.RefObject<HTMLDivElement>
 }
 
-export enum FocusType {
-    None,
-    Div,
-    Svg,
-    Point
-}
-
 export type Point = {
     uuid: string
-    boxId: string
     ref: React.RefObject<SVGSVGElement>
     pos: Position
     isHover: boolean
     isShow: boolean
+}
+
+export enum ActionType {
+    None = 'None',
+    Drag = 'Drag',
+    Focus = 'Focus',
+    Draw = 'Draw',
+    DrawReady = 'DrawReady',
 }
