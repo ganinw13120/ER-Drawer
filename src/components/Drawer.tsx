@@ -1,10 +1,9 @@
 import React, { ReactElement, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { DrawerContext } from '../hooks/drawerContext';
-import { useDrawer } from '../hooks/drawerHook';
+import { DrawerContext } from '../hooks/useDrawerContext';
+import { useDrawer } from '../hooks/useDrawer';
 import { Position, DrawerProps, Box, BoxState } from '../model/Drawer';
 import BoxComponent from './Box';
-// import Box from './Box';
 
 // Utils    
 
