@@ -1,8 +1,8 @@
-import React, { ReactElement, useEffect, useRef, useState } from 'react';
+import React, { ReactElement, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { DrawerContext } from '../hooks/drawerContext';
 import { useDrawer } from '../hooks/drawerHook';
-import { Position, DrawerProps, Box, Line, Point, BoxState } from '../model/Drawer';
+import { Position, DrawerProps, Box, BoxState } from '../model/Drawer';
 import BoxComponent from './Box';
 // import Box from './Box';
 
@@ -21,9 +21,15 @@ const Drawer: React.FC<DrawerProps> = () => {
 
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const [[boxes, setBoxes], [lines, setLines], actionType, setBoxState] = useDrawer();
-
-    const [currentPos, setCurrentPos] = useState<Position>({x : 0, y : 0});
+    const [
+        [boxes, setBoxes], 
+        [lines, setLines], 
+        actionType, 
+        setBoxState, 
+        clearSelection,
+        [onMouseDown, onMouseUp],
+        [currentPos, setCurrentPos]
+    ] = useDrawer();
 
     useEffect(() => {
         const ref = React.createRef<HTMLDivElement>();
@@ -95,7 +101,7 @@ const Drawer: React.FC<DrawerProps> = () => {
 
     const generateLineElement = (): ReactElement[] => {
         let list: ReactElement[] = [];
-        lines.forEach(e => {
+        lines.forEach((e, key) => {
             const startPos = e.startRef?.current ? parseClientRectsToPosition(e.startRef.current!.getClientRects()[0]) : e.startPosition!
             const stopPos = e.stopRef?.current ? parseClientRectsToPosition(e.stopRef.current!.getClientRects()[0]) : e.stopPosition!
 
@@ -107,17 +113,21 @@ const Drawer: React.FC<DrawerProps> = () => {
                 x: (startPos.x + stopPos.x) / 2,
                 y: stopPos.y,
             }
-            list.push(generateSvgLine(`M ${startPos.x} ${startPos.y}, ${middlePositionStart.x} ${startPos.y},${middlePositionStop.x}, ${middlePositionStop.y}  , ${stopPos.x} ${stopPos.y}`))
+            list.push(generateSvgLine(key, `M ${startPos.x} ${startPos.y}, ${middlePositionStart.x} ${startPos.y},${middlePositionStop.x}, ${middlePositionStop.y}  , ${stopPos.x} ${stopPos.y}`))
         })
         return list;
     }
 
-    const generateSvgLine = (path: string): ReactElement => {
-        return <path d={path} stroke="black" fill="transparent" strokeWidth="2" />
+    const generateSvgLine = (key : number, path: string): ReactElement => {
+        return <path key={key} d={path} stroke="black" fill="transparent" strokeWidth="2" />
     }
 
     const onClear = () => {
         setLines([]);
+    }
+
+    const onBackgroundClick = () => {
+        clearSelection();
     }
     
     return (
@@ -125,8 +135,9 @@ const Drawer: React.FC<DrawerProps> = () => {
             <DrawerContext.Provider value={{
                 pos: currentPos
             }}>
-                <button onClick={onClear} style={{ position: 'absolute' }}>Clear</button>
-                <div ref={containerRef} onMouseMove={handleMouseMove} className={`container`}>
+                <a style={{position:'absolute'}}>{actionType}</a>
+                {/* <button onClick={onClear} style={{ position: 'absolute' }}>Clear</button> */}
+                <div ref={containerRef} onMouseMove={handleMouseMove} className={`container`} onMouseDown={onMouseDown} onMouseUp={onMouseUp}>
                     {(() => {
                         let _boxes: Array<ReactElement> = [];
                         boxes.forEach((e, key) => {
@@ -139,7 +150,7 @@ const Drawer: React.FC<DrawerProps> = () => {
                         })
                         return _boxes;
                     })()}
-                    <svg style={{ width: '100%', height: '100%', top: 0 }} >
+                    <svg style={{ width: '100%', height: '100%', top: 0 }} onMouseDown={onBackgroundClick}>
                         <g>
                             {generateLineElement()}
                         </g>

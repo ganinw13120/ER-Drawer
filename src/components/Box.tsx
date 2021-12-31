@@ -51,7 +51,8 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
             pos: {
                 x: 0,
                 y: data.title.ref.current!.clientHeight / 2,
-            }
+            },
+            box : data
         })
         _points.push({
             uuid: uuidv4(),
@@ -61,7 +62,8 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
             pos: {
                 x: data.title.ref.current!.offsetWidth,
                 y: data.title.ref.current!.offsetHeight / 2,
-            }
+            },
+            box : data
         })
         let sum = data.title.ref.current!.offsetHeight;
         data.entities.forEach(en => {
@@ -75,7 +77,8 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
                 pos: {
                     x: 0,
                     y: (en.ref.current!.clientHeight / 2) + sum,
-                }
+                },
+                box : data
             })
             _points.push({
                 uuid: uuidv4(),
@@ -85,7 +88,8 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
                 pos: {
                     x: en.ref.current!.offsetWidth,
                     y: (en.ref.current!.clientHeight / 2) + sum,
-                }
+                },
+                box : data
             })
             sum += en.ref.current!.clientHeight;
         })
@@ -107,10 +111,6 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
     }
 
     const onHoverPoint = (key: string) => {
-        setState({
-            ...state,
-            pointAiming : points.find(e=>e.uuid===key)
-        })
         setPoints(prev => {
             let temp = [...prev];
             temp.find(e => e.uuid === key)!.isHover = true;
@@ -119,16 +119,19 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
     }
 
     const onUnHoverPoint = (key: string) => {
-        setState({
-            ...state,
-            pointAiming : undefined
-        })
         setPoints(prev => {
             let temp = [...prev];
             temp.find(e => e.uuid === key)!.isHover = false;
             return temp;
         })
     }
+
+    useEffect(()=>{
+        setState({
+            ...state,
+            pointAiming : points.find(e=>e.isHover)
+        })
+    }, [points])
 
     const onHoverDiv = () => {
         setState({
@@ -144,20 +147,36 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
         })
     }
 
-    const handleMouseDown = () => {
+    const startDrag = () => {
         setLastPos(currentPos);
-        if (state.pointAiming) return;
         setState({
             ...state,
+            isSelect : true,
             isDragging: true
         })
+
     }
-    const handleMouseUp = () => {
+
+    const stopDrag = () => {
         setLastPos(currentPos);
         setState({
             ...state,
             isDragging: false
         })
+    }
+
+    const isAnyHoveringPoint = () : boolean => {
+        return !points.every(e=>!e.isHover);
+    }
+
+    const handleMouseDown = () => {
+        if (isAnyHoveringPoint()) return;
+        else startDrag();
+    }
+    const handleMouseUp = () => {
+        if (state.isDragging) {
+            stopDrag();
+        }
     }
 
     return (
@@ -204,6 +223,7 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
 
 export default BoxComponent;
 
+
 type PointComponentProps = {
     data: Point
     onHoverPoint: () => void
@@ -213,7 +233,7 @@ type PointComponentProps = {
 const PointComponent: React.FC<PointComponentProps> = ({ data, onHoverPoint, onUnHoverPoint }) => {
     const pointR = 2.5;
     return (<>
-        <svg ref={data.ref} onMouseEnter={() => { onHoverPoint() }} onMouseLeave={() => { onUnHoverPoint() }} key={data.uuid} style={{ cursor: 'pointer', position: 'absolute', top: 0, zIndex: 10, width: `${pointR * 8}px`, height: `${pointR * 8}px`, transform: `translate(${data.pos.x - (pointR * 4)}px, ${data.pos.y + (pointR)}px)` }}>
+        <svg key={data.uuid} ref={data.ref} onMouseEnter={() => { onHoverPoint() }} onMouseLeave={() => { onUnHoverPoint() }} style={{ cursor: 'pointer', position: 'absolute', top: 0, zIndex: 10, width: `${pointR * 8}px`, height: `${pointR * 8}px`, transform: `translate(${data.pos.x - (pointR * 4)}px, ${data.pos.y + (pointR)}px)` }}>
             {data.isHover && <circle cx={pointR * 4} cy={pointR * 4} r={pointR * 2} fill="#d99a9a" />}
         </svg>
     </>)

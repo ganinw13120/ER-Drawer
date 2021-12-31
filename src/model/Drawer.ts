@@ -7,11 +7,11 @@ export type Position = {
 }
 
 export type Line = {
+    uuid : string
     startRef?: React.RefObject<HTMLDivElement> | React.RefObject<SVGSVGElement>
     startPosition?: Position
     stopRef?: React.RefObject<HTMLDivElement> | React.RefObject<SVGSVGElement>
     stopPosition?: Position
-    isFocus: boolean
 }
 
 export type Box = {
@@ -46,6 +46,7 @@ export type Point = {
     pos: Position
     isHover: boolean
     isShow: boolean
+    box : Box
 }
 
 export enum ActionType {
