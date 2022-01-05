@@ -3,6 +3,8 @@ import { Box, BoxState, Point, PointPosition, Position } from '../model/Drawer';
 import { v4 as uuidv4 } from 'uuid';
 import { useDrawerContext } from '../hooks/useDrawerContext';
 
+const pointHitbox : number = 16;
+
 type BoxComponentProps = {
     data: Box
     setBoxState: (state: BoxState) => void
@@ -40,7 +42,8 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
     }, []);
 
     useEffect(() => {
-
+        setPoints([]);
+        generatePoints();
     }, [data])
 
     const generatePoints = () => {
@@ -87,7 +90,6 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
                 box: data
             })
         })
-        console.log(_points)
         setPoints(_points);
     }
 
@@ -240,8 +242,9 @@ type PointComponentProps = {
 
 const PointComponent: React.FC<PointComponentProps> = ({ data, onHoverPoint, onUnHoverPoint, pos }) => {
     const pointR = 2.5;
+    const pointTranslateX = (pointHitbox / 2) - (pointR * 1.75);
     return (<>
-        <svg key={data.uuid} ref={data.ref} onMouseEnter={() => { onHoverPoint() }} onMouseLeave={() => { onUnHoverPoint() }} style={{ cursor: 'pointer', position: 'absolute', top: 0, zIndex: 10, width: `${pointR * 8}px`, height: `${pointR * 8}px`, transform: `translate(${pos.x - (pointR * 4)}px, ${pos.y + (pointR)}px)` }}>
+        <svg key={data.uuid} ref={data.ref} onMouseEnter={() => { onHoverPoint() }} onMouseLeave={() => { onUnHoverPoint() }} style={{ cursor: 'pointer', position: 'absolute', top: 0, zIndex: 10, width: `${pointR * pointHitbox}px`, height: `${pointR * pointHitbox}px`, transform: `translate(${pos.x - (pointR * pointTranslateX)}px, ${pos.y + (pointR)}px)` }}>
             {data.isHover && <circle cx={pointR * 4} cy={pointR * 4} r={pointR * 2} fill="#d99a9a" />}
         </svg>
     </>)
