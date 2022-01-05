@@ -4,17 +4,8 @@ import { DrawerContext } from '../hooks/useDrawerContext';
 import { useDrawer } from '../hooks/useDrawer';
 import { Position, DrawerProps, Box, BoxState } from '../model/Drawer';
 import BoxComponent from './Box';
-
-// Utils    
-
-const parseClientRectsToPosition = (val: DOMRect): Position => {
-    return {
-        x: val.x + 10,
-        y: val.y + 10
-    }
-}
-//
-
+import parseClientRectsToPosition from '../utils/parseClientRectsToPosition';
+import generateBox from '../utils/generateBox';
 
 const Drawer: React.FC<DrawerProps> = () => {
 
@@ -31,63 +22,11 @@ const Drawer: React.FC<DrawerProps> = () => {
     ] = useDrawer();
 
     useEffect(() => {
-        const ref = React.createRef<HTMLDivElement>();
-        const refTitle = React.createRef<HTMLDivElement>();
-        const refEntity1 = React.createRef<HTMLDivElement>();
-
-        const ref_2 = React.createRef<HTMLDivElement>();
-        const refTitle_2 = React.createRef<HTMLDivElement>();
-        const refEntity1_2 = React.createRef<HTMLDivElement>();
-        const testBoxes: Array<Box> = [
-            {
-                ref: ref,
-                uuid: uuidv4(),
-                title: {
-                    text: 'asd',
-                    ref: refTitle
-                },
-                entities: [
-                    {
-                        text: 'test1',
-                        ref: refEntity1,
-                    },
-                ],
-                state: {
-                    isDragging: false,
-                    isHover: false,
-                    isSelect: false,
-                    pos: {
-                        x: 0,
-                        y: 0
-                    }
-                },
-            },
-            {
-                ref: ref_2,
-                uuid: uuidv4(),
-                title: {
-                    text: 'asd',
-                    ref: refTitle_2
-                },
-                entities: [
-                    {
-                        text: 'test1',
-                        ref: refEntity1_2,
-                    },
-                ],
-                state: {
-                    isDragging: false,
-                    isHover: false,
-                    isSelect: false,
-                    pos: {
-                        x: 0,
-                        y: 0
-                    }
-                },
-            },
-        ];
         setLines([]);
-        setBoxes(testBoxes);
+        setBoxes([
+            generateBox('Customer', ['cusomter_id', 'full_name', 'mobile_no', 'password', 'created_at', 'updated_at']),
+            generateBox('Branch', ['branch_d', 'branch_name', 'branch_address', 'mobile_no', 'created_at', 'updated_at'])
+        ]);
     }, []);
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -101,8 +40,8 @@ const Drawer: React.FC<DrawerProps> = () => {
     const generateLineElement = (): ReactElement[] => {
         let list: ReactElement[] = [];
         lines.forEach((e, key) => {
-            const startPos = e.startRef?.current ? parseClientRectsToPosition(e.startRef.current!.getClientRects()[0]) : e.startPosition!
-            const stopPos = e.stopRef?.current ? parseClientRectsToPosition(e.stopRef.current!.getClientRects()[0]) : e.stopPosition!
+            const startPos = e.startRef?.current ? parseClientRectsToPosition(e.startRef.current!.getClientRects()[0], 10) : e.startPosition!
+            const stopPos = e.stopRef?.current ? parseClientRectsToPosition(e.stopRef.current!.getClientRects()[0], 10) : e.stopPosition!
 
             const middlePositionStart: Position = {
                 x: (startPos.x + stopPos.x) / 2,
@@ -160,4 +99,4 @@ const Drawer: React.FC<DrawerProps> = () => {
     );
 }
 
-export default Drawer;
+export default Drawer

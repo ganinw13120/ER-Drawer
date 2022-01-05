@@ -93,6 +93,7 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
             })
             sum += en.ref.current!.clientHeight;
         })
+        console.log(_points)
         setPoints(_points);
     }
 
