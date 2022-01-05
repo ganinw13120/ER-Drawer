@@ -1,6 +1,7 @@
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import { Box, BoxState, Point, Position } from '../model/Drawer';
 import { v4 as uuidv4 } from 'uuid';
+import parseClientRectsToPosition from '../utils/parseClientRectsToPosition';
 import { useDrawerContext } from '../hooks/useDrawerContext';
 
 type BoxComponentProps = {
@@ -43,6 +44,8 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
         const _points: Array<Point> = [];
         const TitleL = React.createRef<SVGSVGElement>();
         const TitleR = React.createRef<SVGSVGElement>();
+        let borderNoise = 0;
+        let borderNoiseAddup = 1;
         _points.push({
             uuid: uuidv4(),
             isHover: false,
@@ -60,7 +63,7 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
             isShow: false,
             ref: TitleR,
             pos: {
-                x: data.title.ref.current!.offsetWidth,
+                x: data.title.ref.current!.offsetWidth + borderNoiseAddup,
                 y: data.title.ref.current!.offsetHeight / 2,
             },
             box : data
@@ -76,7 +79,7 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
                 ref: L,
                 pos: {
                     x: 0,
-                    y: (en.ref.current!.clientHeight / 2) + sum,
+                    y: (en.ref.current!.clientHeight / 2) + sum + borderNoise,
                 },
                 box : data
             })
@@ -86,12 +89,13 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
                 isShow: false,
                 ref: R,
                 pos: {
-                    x: en.ref.current!.offsetWidth,
-                    y: (en.ref.current!.clientHeight / 2) + sum,
+                    x: en.ref.current!.offsetWidth + borderNoiseAddup,
+                    y: (en.ref.current!.clientHeight / 2) + sum + borderNoise,
                 },
                 box : data
             })
             sum += en.ref.current!.clientHeight;
+            borderNoise += borderNoiseAddup;
         })
         console.log(_points)
         setPoints(_points);
@@ -208,7 +212,7 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
                         const details: Array<ReactElement> = [];
                         data.entities.forEach((entity, key) => {
                             details.push(<React.Fragment key={key}>
-                                <div className='box-detail' ref={entity.ref}>
+                                <div className={`${key%2===0 ? 'row-even' : 'row-odd'} box-detail`} ref={entity.ref}>
                                     {entity.text}
                                 </div>
                             </React.Fragment>)
