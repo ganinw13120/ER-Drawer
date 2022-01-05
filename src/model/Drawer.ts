@@ -1,3 +1,5 @@
+import React from "react"
+
 export type DrawerProps = {
 }
 
@@ -43,10 +45,17 @@ export type BoxEntity = {
 export type Point = {
     uuid: string
     ref: React.RefObject<SVGSVGElement>
-    pos: Position
+    parentRef : React.RefObject<HTMLDivElement>
+    position : PointPosition
+    // pos: Position
     isHover: boolean
     isShow: boolean
     box : Box
+}
+
+export enum PointPosition {
+    Left = 'Left',
+    Right = 'Right',
 }
 
 export enum ActionType {
