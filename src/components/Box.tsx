@@ -1,8 +1,9 @@
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
-import { Box, BoxState, Point, Position } from '../model/Drawer';
+import { Box, BoxState, Point, PointPosition, Position } from '../model/Drawer';
 import { v4 as uuidv4 } from 'uuid';
-import parseClientRectsToPosition from '../utils/parseClientRectsToPosition';
 import { useDrawerContext } from '../hooks/useDrawerContext';
+
+const pointHitbox : number = 16;
 
 type BoxComponentProps = {
     data: Box
@@ -40,35 +41,33 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
         generatePoints();
     }, []);
 
+    useEffect(() => {
+        setPoints([]);
+        generatePoints();
+    }, [data])
+
     const generatePoints = () => {
         const _points: Array<Point> = [];
         const TitleL = React.createRef<SVGSVGElement>();
         const TitleR = React.createRef<SVGSVGElement>();
-        let borderNoise = 0;
-        let borderNoiseAddup = 1;
         _points.push({
             uuid: uuidv4(),
             isHover: false,
             isShow: false,
             ref: TitleL,
-            pos: {
-                x: 0,
-                y: data.title.ref.current!.clientHeight / 2,
-            },
-            box : data
+            box: data,
+            position: PointPosition.Left,
+            parentRef: data.title.ref
         })
         _points.push({
             uuid: uuidv4(),
             isHover: false,
             isShow: false,
             ref: TitleR,
-            pos: {
-                x: data.title.ref.current!.offsetWidth + borderNoiseAddup,
-                y: data.title.ref.current!.offsetHeight / 2,
-            },
-            box : data
+            position: PointPosition.Right,
+            parentRef: data.title.ref,
+            box: data
         })
-        let sum = data.title.ref.current!.offsetHeight;
         data.entities.forEach(en => {
             const L = React.createRef<SVGSVGElement>();
             const R = React.createRef<SVGSVGElement>();
@@ -77,32 +76,28 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
                 isHover: false,
                 isShow: false,
                 ref: L,
-                pos: {
-                    x: 0,
-                    y: (en.ref.current!.clientHeight / 2) + sum + borderNoise,
-                },
-                box : data
+                position: PointPosition.Left,
+                parentRef: en.ref,
+                box: data
             })
             _points.push({
                 uuid: uuidv4(),
                 isHover: false,
                 isShow: false,
                 ref: R,
-                pos: {
-                    x: en.ref.current!.offsetWidth + borderNoiseAddup,
-                    y: (en.ref.current!.clientHeight / 2) + sum + borderNoise,
-                },
-                box : data
+                position: PointPosition.Right,
+                parentRef: en.ref,
+                box: data
             })
-            sum += en.ref.current!.clientHeight;
-            borderNoise += borderNoiseAddup;
         })
-        console.log(_points)
         setPoints(_points);
     }
 
     const generatePointElement = (): ReactElement[] => {
         const _points: ReactElement[] = [];
+        let sum = 0;
+        let borderNoise = 0;
+        let borderNoiseAddup = 0.75;
         points.forEach((e, key) => {
             const _onHoverPoint = () => {
                 onHoverPoint(e.uuid);
@@ -110,7 +105,16 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
             const _onUnHoverPoint = () => {
                 onUnHoverPoint(e.uuid);
             }
-            _points.push(<PointComponent data={e} onHoverPoint={_onHoverPoint} onUnHoverPoint={_onUnHoverPoint} />);
+            const pos: Position = e.position === PointPosition.Left ? {
+                x: 0,
+                y: (e.parentRef.current!.clientHeight / 2) + sum + borderNoise,
+            } : {
+                x: e.parentRef.current!.offsetWidth + borderNoiseAddup,
+                y: (e.parentRef.current!.clientHeight / 2) + sum + borderNoise,
+            }
+            if (e.position===PointPosition.Right) sum += e.parentRef.current!.clientHeight;
+            borderNoise += borderNoiseAddup;
+            _points.push(<PointComponent pos={pos} data={e} onHoverPoint={_onHoverPoint} onUnHoverPoint={_onUnHoverPoint} />);
         })
         return _points;
     }
@@ -131,10 +135,10 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
         })
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         setState({
             ...state,
-            pointAiming : points.find(e=>e.isHover)
+            pointAiming: points.find(e => e.isHover)
         })
     }, [points])
 
@@ -156,7 +160,7 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
         setLastPos(currentPos);
         setState({
             ...state,
-            isSelect : true,
+            isSelect: true,
             isDragging: true
         })
 
@@ -170,8 +174,8 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
         })
     }
 
-    const isAnyHoveringPoint = () : boolean => {
-        return !points.every(e=>!e.isHover);
+    const isAnyHoveringPoint = (): boolean => {
+        return !points.every(e => !e.isHover);
     }
 
     const handleMouseDown = () => {
@@ -212,7 +216,7 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
                         const details: Array<ReactElement> = [];
                         data.entities.forEach((entity, key) => {
                             details.push(<React.Fragment key={key}>
-                                <div className={`${key%2===0 ? 'row-even' : 'row-odd'} box-detail`} ref={entity.ref}>
+                                <div className={`${key % 2 === 0 ? 'row-even' : 'row-odd'} box-detail`} ref={entity.ref}>
                                     {entity.text}
                                 </div>
                             </React.Fragment>)
@@ -233,12 +237,14 @@ type PointComponentProps = {
     data: Point
     onHoverPoint: () => void
     onUnHoverPoint: () => void
+    pos: Position
 }
 
-const PointComponent: React.FC<PointComponentProps> = ({ data, onHoverPoint, onUnHoverPoint }) => {
+const PointComponent: React.FC<PointComponentProps> = ({ data, onHoverPoint, onUnHoverPoint, pos }) => {
     const pointR = 2.5;
+    const pointTranslateX = (pointHitbox / 2) - (pointR * 1.75);
     return (<>
-        <svg key={data.uuid} ref={data.ref} onMouseEnter={() => { onHoverPoint() }} onMouseLeave={() => { onUnHoverPoint() }} style={{ cursor: 'pointer', position: 'absolute', top: 0, zIndex: 10, width: `${pointR * 8}px`, height: `${pointR * 8}px`, transform: `translate(${data.pos.x - (pointR * 4)}px, ${data.pos.y + (pointR)}px)` }}>
+        <svg key={data.uuid} ref={data.ref} onMouseEnter={() => { onHoverPoint() }} onMouseLeave={() => { onUnHoverPoint() }} style={{ cursor: 'pointer', position: 'absolute', top: 0, zIndex: 10, width: `${pointR * pointHitbox}px`, height: `${pointR * pointHitbox}px`, transform: `translate(${pos.x - (pointR * pointTranslateX)}px, ${pos.y + (pointR)}px)` }}>
             {data.isHover && <circle cx={pointR * 4} cy={pointR * 4} r={pointR * 2} fill="#d99a9a" />}
         </svg>
     </>)

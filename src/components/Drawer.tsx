@@ -7,6 +7,12 @@ import BoxComponent from './Box';
 import parseClientRectsToPosition from '../utils/parseClientRectsToPosition';
 import generateBox from '../utils/generateBox';
 
+const lineStartTickDistance : number = 13;
+const lineStartTickLength : number = 26;
+
+const lineStopTickDistance : number = 20;
+const lineStopTickSpread : number = 13;
+
 const Drawer: React.FC<DrawerProps> = () => {
 
     const containerRef = useRef<HTMLDivElement>(null);
@@ -24,6 +30,8 @@ const Drawer: React.FC<DrawerProps> = () => {
     useEffect(() => {
         setLines([]);
         setBoxes([
+            generateBox('นักเรียน', ['รหัสนักเรียน', 'ชื่อจริง', 'นามสกุล', 'เบอร์โทร', 'วันเกิด']),
+            generateBox('นักเลง', ['รหัสนักเรียน', 'ชื่อจริง', 'นามสกุล', 'เบอร์โทร', 'วันเกิด', 'ที่อยู่']),
             generateBox('Customer', ['cusomter_id', 'full_name', 'mobile_no', 'password', 'created_at', 'updated_at']),
             generateBox('Branch', ['branch_d', 'branch_name', 'branch_address', 'mobile_no', 'created_at', 'updated_at'])
         ]);
@@ -52,12 +60,17 @@ const Drawer: React.FC<DrawerProps> = () => {
                 y: stopPos.y,
             }
             list.push(generateSvgLine(key, `M ${startPos.x} ${startPos.y}, ${middlePositionStart.x} ${startPos.y},${middlePositionStop.x}, ${middlePositionStop.y}  , ${stopPos.x} ${stopPos.y}`))
+            list.push(generateSvgLine(key, `M ${startPos.x + lineStartTickDistance} ${startPos.y + (lineStartTickLength / 2)}, ${startPos.x + lineStartTickDistance} ${startPos.y - (lineStartTickLength / 2)}`))
+            list.push(generateSvgLine(key, `M ${stopPos.x - lineStopTickDistance} ${stopPos.y}, ${stopPos.x} ${stopPos.y + lineStopTickSpread}`))
+            list.push(generateSvgLine(key, `M ${stopPos.x - lineStopTickDistance} ${stopPos.y}, ${stopPos.x} ${stopPos.y }`))
+            list.push(generateSvgLine(key, `M ${stopPos.x - lineStopTickDistance} ${stopPos.y}, ${stopPos.x} ${stopPos.y - lineStopTickSpread}`))
         })
         return list;
     }
 
     const generateSvgLine = (key : number, path: string): ReactElement => {
-        return <path key={key} d={path} stroke="black" fill="transparent" strokeWidth="2" />
+        return <><path key={key} d={path} stroke="black" fill="transparent" strokeWidth="2" /></>
+
     }
 
     const onClear = () => {
