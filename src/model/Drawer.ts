@@ -47,9 +47,7 @@ export type Point = {
     ref: React.RefObject<SVGSVGElement>
     parentRef : React.RefObject<HTMLDivElement>
     position : PointPosition
-    // pos: Position
     isHover: boolean
-    isShow: boolean
     box : Box
 }
 

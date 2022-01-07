@@ -1,8 +1,7 @@
 import React, { ReactElement, useEffect, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { DrawerContext } from '../hooks/useDrawerContext';
 import { useDrawer } from '../hooks/useDrawer';
-import { Position, DrawerProps, Box, BoxState } from '../model/Drawer';
+import { Position, DrawerProps, BoxState } from '../model/Drawer';
 import BoxComponent from './Box';
 import parseClientRectsToPosition from '../utils/parseClientRectsToPosition';
 import generateBox from '../utils/generateBox';
@@ -48,8 +47,8 @@ const Drawer: React.FC<DrawerProps> = () => {
     const generateLineElement = (): ReactElement[] => {
         let list: ReactElement[] = [];
         lines.forEach((e, key) => {
-            const startPos = e.startRef?.current ? parseClientRectsToPosition(e.startRef.current!.getClientRects()[0], 10) : e.startPosition!
-            const stopPos = e.stopRef?.current ? parseClientRectsToPosition(e.stopRef.current!.getClientRects()[0], 10) : e.stopPosition!
+            const startPos = e.startRef?.current ? parseClientRectsToPosition(e.startRef.current!.getClientRects()[0], 15) : e.startPosition!
+            const stopPos = e.stopRef?.current ? parseClientRectsToPosition(e.stopRef.current!.getClientRects()[0], 15) : e.stopPosition!
 
             const middlePositionStart: Position = {
                 x: (startPos.x + stopPos.x) / 2,
@@ -60,7 +59,9 @@ const Drawer: React.FC<DrawerProps> = () => {
                 y: stopPos.y,
             }
             list.push(generateSvgLine(key, `M ${startPos.x} ${startPos.y}, ${middlePositionStart.x} ${startPos.y},${middlePositionStop.x}, ${middlePositionStop.y}  , ${stopPos.x} ${stopPos.y}`))
+
             list.push(generateSvgLine(key, `M ${startPos.x + lineStartTickDistance} ${startPos.y + (lineStartTickLength / 2)}, ${startPos.x + lineStartTickDistance} ${startPos.y - (lineStartTickLength / 2)}`))
+            
             list.push(generateSvgLine(key, `M ${stopPos.x - lineStopTickDistance} ${stopPos.y}, ${stopPos.x} ${stopPos.y + lineStopTickSpread}`))
             list.push(generateSvgLine(key, `M ${stopPos.x - lineStopTickDistance} ${stopPos.y}, ${stopPos.x} ${stopPos.y }`))
             list.push(generateSvgLine(key, `M ${stopPos.x - lineStopTickDistance} ${stopPos.y}, ${stopPos.x} ${stopPos.y - lineStopTickSpread}`))

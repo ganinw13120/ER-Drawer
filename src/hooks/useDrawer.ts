@@ -37,14 +37,17 @@ export const useDrawer = (): useDrawerType => {
 
     const checkAction = (): ActionType => {
         let isFocusing, isDragging, isDrawingReady = false;
+        let _focusEntity = null;
         boxes.forEach(e => {
             if (e.state.isDragging) isDragging = true;
             if (e.state.isHover) isFocusing = true;
             if (e.state.pointAiming) {
-                setFocusEntity(e.state.pointAiming);
+                // setFocusEntity(e.state.pointAiming);
+                _focusEntity = e.state.pointAiming;
                 isDrawingReady = true;
             }
         })
+        setFocusEntity(_focusEntity);
         if (isDrawingReady) {
             return ActionType.DrawReady;
         }
@@ -63,6 +66,7 @@ export const useDrawer = (): useDrawerType => {
         }
         else {
             checkAction();
+            console.log(checkAction())
         }
     }, [boxes]);
 
@@ -97,6 +101,7 @@ export const useDrawer = (): useDrawerType => {
         if (!focusLine) return;
         setLines((prev) => {
             const temp = [...prev];
+            console.log(focusEntity)
             if (focusEntity) {
                 temp.find(e => e.uuid === focusLine.uuid)!.stopRef = focusEntity.ref;
                 temp.find(e => e.uuid === focusLine.uuid)!.stopPosition = undefined;
