@@ -10,29 +10,8 @@ type BoxComponentProps = {
     setBoxState: (state: BoxState) => void
 }
 
-enum ActionType {
-    Hover,
-    UnHover
-}
-interface StateAction {
-    type: ActionType;
-    payload: number;
-  }
-
 const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
     const [points, setPoints] = useState<Array<Point>>([]);
-
-    const reducer = (state: BoxState, action: StateAction) => {
-        switch (action.type) {
-            case ActionType.Hover:
-                return { ...state };
-            case ActionType.UnHover:
-                return { ...state };
-            default:
-                throw new Error();
-        }
-    }
-    const [states, dispatch] = useReducer(reducer, data.state);
 
     const [state, setState] = useState<BoxState>(data.state);
 

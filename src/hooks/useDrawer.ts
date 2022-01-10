@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
-import { ActionType, Box, BoxState, Line, Point, Position } from "../model/Drawer";
+import { ActionType, Box, BoxState, Line, LineType, Point, Position } from "../model/Drawer";
 
 type useDrawerType = [
     [
@@ -66,7 +66,6 @@ export const useDrawer = (): useDrawerType => {
         }
         else {
             checkAction();
-            console.log(checkAction())
         }
     }, [boxes]);
 
@@ -89,6 +88,11 @@ export const useDrawer = (): useDrawerType => {
                 uuid: uuidv4(),
                 startRef: focusEntity.ref,
                 stopPosition: pos,
+                startType : LineType.OnlyOne,
+                stopType : LineType.More,
+                state : {
+                    isFocus : false
+                }
             }
             temp.push(line)
             setFocusLine(line);
@@ -101,7 +105,6 @@ export const useDrawer = (): useDrawerType => {
         if (!focusLine) return;
         setLines((prev) => {
             const temp = [...prev];
-            console.log(focusEntity)
             if (focusEntity) {
                 temp.find(e => e.uuid === focusLine.uuid)!.stopRef = focusEntity.ref;
                 temp.find(e => e.uuid === focusLine.uuid)!.stopPosition = undefined;
