@@ -87,6 +87,7 @@ export const useDrawer = (): useDrawerType => {
             const line: Line = {
                 uuid: uuidv4(),
                 startRef: focusEntity.ref,
+                startPoint: focusEntity,
                 stopPosition: pos,
                 startType : LineType.OnlyOne,
                 stopType : LineType.More,
@@ -107,6 +108,7 @@ export const useDrawer = (): useDrawerType => {
             const temp = [...prev];
             if (focusEntity) {
                 temp.find(e => e.uuid === focusLine.uuid)!.stopRef = focusEntity.ref;
+                temp.find(e => e.uuid === focusLine.uuid)!.stopPoint = focusEntity;
                 temp.find(e => e.uuid === focusLine.uuid)!.stopPosition = undefined;
             } else {
                 temp.find(e => e.uuid === focusLine.uuid)!.stopPosition = pos;

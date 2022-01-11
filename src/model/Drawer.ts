@@ -16,8 +16,12 @@ export type Line = {
     stopPosition?: Position
     startType : LineType
     stopType : LineType
+    startPoint ?: Point
+    stopPoint ?: Point
     state : LineState
 }
+
+export type Entity = Box
 
 export type LineState = {
     isFocus : boolean
