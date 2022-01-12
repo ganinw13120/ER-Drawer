@@ -1,17 +1,10 @@
 import React, { ReactElement, useEffect, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { DrawerContext } from '../hooks/useDrawerContext';
 import { useDrawer } from '../hooks/useDrawer';
-import { Position, DrawerProps, Box, BoxState } from '../model/Drawer';
+import { Position, DrawerProps, BoxState, LineState } from '../model/Drawer';
 import BoxComponent from './Box';
-import parseClientRectsToPosition from '../utils/parseClientRectsToPosition';
 import generateBox from '../utils/generateBox';
-
-const lineStartTickDistance : number = 13;
-const lineStartTickLength : number = 26;
-
-const lineStopTickDistance : number = 20;
-const lineStopTickSpread : number = 13;
+import Line from './Line';
 
 const Drawer: React.FC<DrawerProps> = () => {
 
@@ -24,7 +17,7 @@ const Drawer: React.FC<DrawerProps> = () => {
         setBoxState, 
         clearSelection,
         [onMouseDown, onMouseUp],
-        [currentPos, setCurrentPos]
+        [currentPos, setCurrentPos],
     ] = useDrawer();
 
     useEffect(() => {
@@ -48,29 +41,12 @@ const Drawer: React.FC<DrawerProps> = () => {
     const generateLineElement = (): ReactElement[] => {
         let list: ReactElement[] = [];
         lines.forEach((e, key) => {
-            const startPos = e.startRef?.current ? parseClientRectsToPosition(e.startRef.current!.getClientRects()[0], 10) : e.startPosition!
-            const stopPos = e.stopRef?.current ? parseClientRectsToPosition(e.stopRef.current!.getClientRects()[0], 10) : e.stopPosition!
+            const setLineState = (state : LineState) => {
 
-            const middlePositionStart: Position = {
-                x: (startPos.x + stopPos.x) / 2,
-                y: startPos.y,
             }
-            const middlePositionStop: Position = {
-                x: (startPos.x + stopPos.x) / 2,
-                y: stopPos.y,
-            }
-            list.push(generateSvgLine(key, `M ${startPos.x} ${startPos.y}, ${middlePositionStart.x} ${startPos.y},${middlePositionStop.x}, ${middlePositionStop.y}  , ${stopPos.x} ${stopPos.y}`))
-            list.push(generateSvgLine(key, `M ${startPos.x + lineStartTickDistance} ${startPos.y + (lineStartTickLength / 2)}, ${startPos.x + lineStartTickDistance} ${startPos.y - (lineStartTickLength / 2)}`))
-            list.push(generateSvgLine(key, `M ${stopPos.x - lineStopTickDistance} ${stopPos.y}, ${stopPos.x} ${stopPos.y + lineStopTickSpread}`))
-            list.push(generateSvgLine(key, `M ${stopPos.x - lineStopTickDistance} ${stopPos.y}, ${stopPos.x} ${stopPos.y }`))
-            list.push(generateSvgLine(key, `M ${stopPos.x - lineStopTickDistance} ${stopPos.y}, ${stopPos.x} ${stopPos.y - lineStopTickSpread}`))
+            list.push(<Line data={e} setLineState={setLineState} />)
         })
         return list;
-    }
-
-    const generateSvgLine = (key : number, path: string): ReactElement => {
-        return <><path key={key} d={path} stroke="black" fill="transparent" strokeWidth="2" /></>
-
     }
 
     const onClear = () => {

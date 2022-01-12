@@ -9,11 +9,29 @@ export type Position = {
 }
 
 export type Line = {
-    uuid : string
+    uuid: string
     startRef?: React.RefObject<HTMLDivElement> | React.RefObject<SVGSVGElement>
     startPosition?: Position
     stopRef?: React.RefObject<HTMLDivElement> | React.RefObject<SVGSVGElement>
     stopPosition?: Position
+    startType : LineType
+    stopType : LineType
+    startPoint ?: Point
+    stopPoint ?: Point
+    state : LineState
+}
+
+export type Entity = Box
+
+export type LineState = {
+    isFocus : boolean
+}
+
+export enum LineType {
+    OnlyOne,
+    More,
+    AnyNumber,
+    Optional
 }
 
 export type Box = {
@@ -45,12 +63,10 @@ export type BoxEntity = {
 export type Point = {
     uuid: string
     ref: React.RefObject<SVGSVGElement>
-    parentRef : React.RefObject<HTMLDivElement>
-    position : PointPosition
-    // pos: Position
+    parentRef: React.RefObject<HTMLDivElement>
+    position: PointPosition
     isHover: boolean
-    isShow: boolean
-    box : Box
+    box: Box
 }
 
 export enum PointPosition {

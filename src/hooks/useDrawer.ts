@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
-import { ActionType, Box, BoxState, Line, Point, Position } from "../model/Drawer";
+import { ActionType, Box, BoxState, Line, LineType, Point, Position } from "../model/Drawer";
 
 type useDrawerType = [
     [
@@ -37,14 +37,17 @@ export const useDrawer = (): useDrawerType => {
 
     const checkAction = (): ActionType => {
         let isFocusing, isDragging, isDrawingReady = false;
+        let _focusEntity = null;
         boxes.forEach(e => {
             if (e.state.isDragging) isDragging = true;
             if (e.state.isHover) isFocusing = true;
             if (e.state.pointAiming) {
-                setFocusEntity(e.state.pointAiming);
+                // setFocusEntity(e.state.pointAiming);
+                _focusEntity = e.state.pointAiming;
                 isDrawingReady = true;
             }
         })
+        setFocusEntity(_focusEntity);
         if (isDrawingReady) {
             return ActionType.DrawReady;
         }
@@ -84,7 +87,13 @@ export const useDrawer = (): useDrawerType => {
             const line: Line = {
                 uuid: uuidv4(),
                 startRef: focusEntity.ref,
+                startPoint: focusEntity,
                 stopPosition: pos,
+                startType : LineType.OnlyOne,
+                stopType : LineType.More,
+                state : {
+                    isFocus : false
+                }
             }
             temp.push(line)
             setFocusLine(line);
@@ -99,6 +108,7 @@ export const useDrawer = (): useDrawerType => {
             const temp = [...prev];
             if (focusEntity) {
                 temp.find(e => e.uuid === focusLine.uuid)!.stopRef = focusEntity.ref;
+                temp.find(e => e.uuid === focusLine.uuid)!.stopPoint = focusEntity;
                 temp.find(e => e.uuid === focusLine.uuid)!.stopPosition = undefined;
             } else {
                 temp.find(e => e.uuid === focusLine.uuid)!.stopPosition = pos;
