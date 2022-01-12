@@ -5,6 +5,7 @@ import { Position, DrawerProps, BoxState, LineState } from '../model/Drawer';
 import BoxComponent from './Box';
 import generateBox from '../utils/generateBox';
 import Line from './Line';
+import Stat from './Stat';
 
 const Drawer: React.FC<DrawerProps> = () => {
 
@@ -56,9 +57,14 @@ const Drawer: React.FC<DrawerProps> = () => {
     const onBackgroundClick = () => {
         clearSelection();
     }
+
+    console.log((performance as any).memory)
+    
+
     
     return (
         <>
+            <Stat />
             <DrawerContext.Provider value={{
                 pos: currentPos
             }}>

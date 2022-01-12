@@ -4,6 +4,15 @@
   width: 100%;
 }
 
+.stat-container {
+  background-color: #afd8fe;
+  position : absolute;
+  z-index: 10;
+  margin : 30px;
+  padding : 10px;
+  width : 200px;
+}
+
 .app {
   height: 100%;
   width: 100%;
