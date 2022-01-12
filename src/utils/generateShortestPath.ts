@@ -1,18 +1,18 @@
 import { LinePathParameters, pathReservY, pathReservX, lineStartTickDistance } from "../components/Line";
 import { PointPosition, Position } from "../model/Drawer";
 
-const generateShortestPath = (param : LinePathParameters) : Position[] => {
+const generateShortestPath = (param: LinePathParameters): Position[] => {
     const {
         startPos,
         stopPos,
         startPoint,
         stopPoint,
     } = param;
-    const path : Array<Array<Position>> = [];
+    const path: Array<Array<Position>> = [];
     if (startPoint && stopPoint) {
         if (
-            (startPos.x < stopPos.x && startPoint.position===PointPosition.Right && stopPoint.position===PointPosition.Left) ||
-            (startPos.x > stopPos.x && startPoint.position===PointPosition.Left && stopPoint.position===PointPosition.Right)
+            (startPos.x < stopPos.x && startPoint.position === PointPosition.Right && stopPoint.position === PointPosition.Left) ||
+            (startPos.x > stopPos.x && startPoint.position === PointPosition.Left && stopPoint.position === PointPosition.Right)
         ) {
             path.push(getSimplePath(param));
         } else {
@@ -27,9 +27,9 @@ const generateShortestPath = (param : LinePathParameters) : Position[] => {
 
     // if ((startPos.x < stopPos.x && startPoint?.position))
 
-    let min : Position[] = [];
-    let minDistance : number = Infinity;
-    path.forEach(e=>{
+    let min: Position[] = [];
+    let minDistance: number = Infinity;
+    path.forEach(e => {
         const distance = calDistance(e);
         if (distance < minDistance) {
             minDistance = distance;
@@ -39,7 +39,7 @@ const generateShortestPath = (param : LinePathParameters) : Position[] => {
     return min;
 }
 
-const getSimplePath = (param : LinePathParameters) : Position[] => {
+const getSimplePath = (param: LinePathParameters): Position[] => {
     const {
         startPos,
         stopPos,
@@ -60,12 +60,12 @@ const getSimplePath = (param : LinePathParameters) : Position[] => {
     ]
 }
 
-const calDistance = (pos : Position[]) : number => {
-    let totalDistance : number = 0;
-    let i : number = 0;
-    while (i < pos.length-2) {
+const calDistance = (pos: Position[]): number => {
+    let totalDistance: number = 0;
+    let i: number = 0;
+    while (i < pos.length - 2) {
         const cur = pos[i];
-        const next = pos[i+1];
+        const next = pos[i + 1];
         const distance = Math.sqrt(Math.pow(cur.x - next.x, 2) + Math.pow(cur.y - next.y, 2));
         totalDistance += distance;
         i++;
@@ -124,7 +124,7 @@ const getRoundBottom = (param: LinePathParameters): Position[] => {
         /// 2.
         checkPoints.push({ x: boxRect!.x - pathReservX, y: startPos.y });
         /// 3.
-        checkPoints.push({ x: boxRect!.x - pathReservX, y: (boxRect!.y+ boxRect!.height) + pathReservY });
+        checkPoints.push({ x: boxRect!.x - pathReservX, y: (boxRect!.y + boxRect!.height) + pathReservY });
         /// 4.
         checkPoints.push({ x: stopPos.x + pathReservX, y: (boxRect!.y + boxRect!.height) + pathReservY });
     }
