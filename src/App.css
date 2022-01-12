@@ -6,6 +6,7 @@
 
 .stat-container {
   background-color: #afd8fe;
+  right : 0;
   position : absolute;
   z-index: 10;
   margin : 30px;
