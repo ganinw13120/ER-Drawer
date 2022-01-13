@@ -2,7 +2,6 @@ import React, { ReactElement, useEffect, useReducer, useState } from 'react';
 import { Box, BoxState, Point, PointPosition, Position } from '../model/Drawer';
 import { v4 as uuidv4 } from 'uuid';
 import { useDrawerContext } from '../hooks/useDrawerContext';
-import { useDrawerStore } from '../stores/DrawerStore';
 
 const pointHitbox: number = 30;
 
@@ -13,9 +12,7 @@ type BoxComponentProps = {
 
 const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
 
-    const drawerStore = useDrawerStore();
-
-    const {currentMousePosition : currentPos} = drawerStore.store;
+    const { pos: currentPos } = useDrawerContext();
 
     const [points, setPoints] = useState<Array<Point>>([]);
 

@@ -6,15 +6,10 @@ import BoxComponent from './Box';
 import generateBox from '../utils/generateBox';
 import Line from './Line';
 import Stat from './Stat';
-import { Provider } from 'mobx-react';
-import DrawerStore, { DrawerStoreContext, useDrawerStore } from '../stores/DrawerStore';
-
 
 const Drawer: React.FC<DrawerProps> = () => {
 
     const containerRef = useRef<HTMLDivElement>(null);
-
-    const store = useDrawerStore();
 
     const [
         [boxes, setBoxes],
@@ -41,7 +36,6 @@ const Drawer: React.FC<DrawerProps> = () => {
             x: e.pageX,
             y: e.pageY
         }
-        store.setCurrentMousePosition(current);
         setCurrentPos(current);
     }
 
@@ -67,6 +61,9 @@ const Drawer: React.FC<DrawerProps> = () => {
     return (
         <>
             <Stat />
+            <DrawerContext.Provider value={{
+                pos: currentPos
+            }}>
                 <a style={{ position: 'absolute' }}>{actionType}</a>
                 {/* <button onClick={onClear} style={{ position: 'absolute' }}>Clear</button> */}
                 <div ref={containerRef} onMouseMove={handleMouseMove} className={`container`} onMouseDown={onMouseDown} onMouseUp={onMouseUp}>
@@ -88,6 +85,7 @@ const Drawer: React.FC<DrawerProps> = () => {
                         </g>
                     </svg>
                 </div>
+            </DrawerContext.Provider>
         </>
     );
 }
