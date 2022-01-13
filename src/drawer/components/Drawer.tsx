@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useRef, createContext, useContext } from 'react';
 import { DrawerContext } from '../hooks/useDrawerContext';
 import { useDrawer } from '../hooks/useDrawer';
-import { Position, DrawerProps, BoxState, LineState } from '../model/Drawer';
+import { Position, DrawerProps, BoxState, LineState, ActionType } from '../model/Drawer';
 import BoxComponent from './Box';
 import generateBox from '../utils/generateBox';
 import Line from './Line';
@@ -9,26 +9,21 @@ import Stat from './Stat';
 import { Provider } from 'mobx-react';
 import DrawerStore, { DrawerStoreContext, useDrawerStore } from '../stores/DrawerStore';
 
+import { observer } from "mobx-react";
 
-const Drawer: React.FC<DrawerProps> = () => {
+const Drawer: React.FC<DrawerProps> = observer(() => {
 
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const store = useDrawerStore();
+    const store = useContext(DrawerStoreContext);
 
-    const [
-        [boxes, setBoxes],
-        [lines, setLines],
-        actionType,
-        setBoxState,
-        clearSelection,
-        [onMouseDown, onMouseUp],
-        [currentPos, setCurrentPos],
-    ] = useDrawer();
+    useEffect(()=>{
+        console.log(store!.store)
+    }, [store])
 
     useEffect(() => {
-        setLines([]);
-        setBoxes([
+        store!.clearLine();
+        store!.setBoxes([
             generateBox('นักเรียน', ['รหัสนักเรียน', 'ชื่อจริง', 'นามสกุล', 'เบอร์โทร', 'วันเกิด']),
             generateBox('นักเลง', ['รหัสนักเรียน', 'ชื่อจริง', 'นามสกุล', 'เบอร์โทร', 'วันเกิด', 'ที่อยู่']),
             generateBox('Customer', ['cusomter_id', 'full_name', 'mobile_no', 'password', 'created_at', 'updated_at']),
@@ -41,13 +36,12 @@ const Drawer: React.FC<DrawerProps> = () => {
             x: e.pageX,
             y: e.pageY
         }
-        store.setCurrentMousePosition(current);
-        setCurrentPos(current);
+        store!.setCurrentMousePosition(current);
     }
 
     const generateLineElement = (): ReactElement[] => {
         let list: ReactElement[] = [];
-        lines.forEach((e, key) => {
+        store!.store.lines.forEach((e, key) => {
             const setLineState = (state: LineState) => {
 
             }
@@ -56,25 +50,35 @@ const Drawer: React.FC<DrawerProps> = () => {
         return list;
     }
 
-    const onClear = () => {
-        setLines([]);
+    const onBackgroundClick = () => {
+        store!.clearSelection();
     }
 
-    const onBackgroundClick = () => {
-        clearSelection();
+    const onMouseDown = (): void => {
+        if (store!.store.actionType === ActionType.DrawReady) {
+            store!.startDrawing();
+        }
     }
+
+    const onMouseUp = (): void => {
+        if (store!.store.actionType === ActionType.Draw) {
+            store!.stopDrawing();
+        }
+    }
+
+    console.log(store!.store)
 
     return (
         <>
             <Stat />
-                <a style={{ position: 'absolute' }}>{actionType}</a>
+                <a style={{ position: 'absolute' }}>{store!.store.actionType}</a>
                 {/* <button onClick={onClear} style={{ position: 'absolute' }}>Clear</button> */}
                 <div ref={containerRef} onMouseMove={handleMouseMove} className={`container`} onMouseDown={onMouseDown} onMouseUp={onMouseUp}>
                     {(() => {
                         let _boxes: Array<ReactElement> = [];
-                        boxes.forEach((e, key) => {
+                        store!.store.boxes.forEach((e, key) => {
                             const _setBoxState = (state: BoxState) => {
-                                setBoxState(key, state);
+                                store!.setBoxState(key, state);;
                             }
                             _boxes.push(<React.Fragment key={key}>
                                 <BoxComponent data={e} setBoxState={_setBoxState} />
@@ -90,6 +94,6 @@ const Drawer: React.FC<DrawerProps> = () => {
                 </div>
         </>
     );
-}
+})
 
 export default Drawer

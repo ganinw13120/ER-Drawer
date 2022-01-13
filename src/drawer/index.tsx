@@ -9,7 +9,7 @@ const Index : React.FC = () => {
   return (
     <>
       <div className='app'>
-        <DrawerStoreContext.Provider value={drawerStore}>
+        <DrawerStoreContext.Provider value={new DrawerStore()}>
             <Drawer />
         </DrawerStoreContext.Provider>
       </div>
