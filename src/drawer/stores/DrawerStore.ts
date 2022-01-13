@@ -23,6 +23,7 @@ export default class DrawerStore implements IDrawerStore {
 
     @action.bound
     setCurrentMousePosition (pos : Position) : void {
+        console.log('asd')
         this._store.currentMousePosition = pos;
     }
 

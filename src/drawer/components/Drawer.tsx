@@ -8,13 +8,13 @@ import Line from './Line';
 import Stat from './Stat';
 import { Provider } from 'mobx-react';
 import DrawerStore, { DrawerStoreContext, useDrawerStore } from '../stores/DrawerStore';
-import { useLocalStore } from 'mobx-react' // 6.x or mobx-react-lite@1.4.0
 
-const drawerStore = new DrawerStore();
 
 const Drawer: React.FC<DrawerProps> = () => {
 
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const store = useDrawerStore();
 
     const [
         [boxes, setBoxes],
@@ -41,6 +41,7 @@ const Drawer: React.FC<DrawerProps> = () => {
             x: e.pageX,
             y: e.pageY
         }
+        store.setCurrentMousePosition(current);
         setCurrentPos(current);
     }
 
@@ -63,39 +64,30 @@ const Drawer: React.FC<DrawerProps> = () => {
         clearSelection();
     }
 
-    console.log((performance as any).memory)
-
-
     return (
         <>
             <Stat />
-            <DrawerStoreContext.Provider value={drawerStore}>
-                <DrawerContext.Provider value={{
-                    pos: currentPos
-                }}>
-                    <a style={{ position: 'absolute' }}>{actionType}</a>
-                    {/* <button onClick={onClear} style={{ position: 'absolute' }}>Clear</button> */}
-                    <div ref={containerRef} onMouseMove={handleMouseMove} className={`container`} onMouseDown={onMouseDown} onMouseUp={onMouseUp}>
-                        {(() => {
-                            let _boxes: Array<ReactElement> = [];
-                            boxes.forEach((e, key) => {
-                                const _setBoxState = (state: BoxState) => {
-                                    setBoxState(key, state);
-                                }
-                                _boxes.push(<React.Fragment key={key}>
-                                    <BoxComponent data={e} setBoxState={_setBoxState} />
-                                </React.Fragment>)
-                            })
-                            return _boxes;
-                        })()}
-                        <svg style={{ width: '100%', height: '100%', top: 0 }} onMouseDown={onBackgroundClick}>
-                            <g>
-                                {generateLineElement()}
-                            </g>
-                        </svg>
-                    </div>
-                </DrawerContext.Provider>
-            </DrawerStoreContext.Provider>
+                <a style={{ position: 'absolute' }}>{actionType}</a>
+                {/* <button onClick={onClear} style={{ position: 'absolute' }}>Clear</button> */}
+                <div ref={containerRef} onMouseMove={handleMouseMove} className={`container`} onMouseDown={onMouseDown} onMouseUp={onMouseUp}>
+                    {(() => {
+                        let _boxes: Array<ReactElement> = [];
+                        boxes.forEach((e, key) => {
+                            const _setBoxState = (state: BoxState) => {
+                                setBoxState(key, state);
+                            }
+                            _boxes.push(<React.Fragment key={key}>
+                                <BoxComponent data={e} setBoxState={_setBoxState} />
+                            </React.Fragment>)
+                        })
+                        return _boxes;
+                    })()}
+                    <svg style={{ width: '100%', height: '100%', top: 0 }} onMouseDown={onBackgroundClick}>
+                        <g>
+                            {generateLineElement()}
+                        </g>
+                    </svg>
+                </div>
         </>
     );
 }

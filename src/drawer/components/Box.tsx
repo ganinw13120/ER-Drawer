@@ -17,8 +17,6 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
 
     const {currentMousePosition : currentPos} = drawerStore.store;
 
-    console.log(drawerStore.store)
-
     const [points, setPoints] = useState<Array<Point>>([]);
 
     const [state, setState] = useState<BoxState>(data.state);

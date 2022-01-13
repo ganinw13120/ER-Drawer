@@ -1,13 +1,11 @@
 import React from 'react';
 import './App.css';
-import Drawer from './components/Drawer';
+import Index from './drawer';
 
 const App : React.FC = () => {
   return (
     <>
-      <div className='app'>
-        <Drawer />
-      </div>
+      <Index />
     </>
   );
 }
