@@ -11,8 +11,8 @@ const generateShortestPath = (param: LinePathParameters): Position[] => {
     const path: Array<Array<Position>> = [];
     if (startPoint && stopPoint) {
         if (
-            (startPos.x + lineStartTickDistance < stopPos.x - lineStartTickDistance && startPoint.position === PointPosition.Right && stopPoint.position === PointPosition.Left) ||
-            (startPos.x - lineStartTickDistance > stopPos.x + lineStartTickDistance && startPoint.position === PointPosition.Left && stopPoint.position === PointPosition.Right)
+            (startPos.x + lineStartTickDistance <= stopPos.x - lineStartTickDistance && startPoint.position === PointPosition.Right && stopPoint.position === PointPosition.Left) ||
+            (startPos.x - lineStartTickDistance >= stopPos.x + lineStartTickDistance && startPoint.position === PointPosition.Left && stopPoint.position === PointPosition.Right)
         ) {
             path.push(getSimplePath(param));
         } else {

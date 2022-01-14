@@ -6,6 +6,7 @@ import BoxComponent from './Box';
 import generateBox from '../utils/generateBox';
 import Line from './Line';
 import Stat from './Stat';
+import ControlPanel from './ControlPanel';
 
 const Drawer: React.FC<DrawerProps> = () => {
 
@@ -65,6 +66,7 @@ const Drawer: React.FC<DrawerProps> = () => {
     return (
         <>
             <Stat />
+            <ControlPanel />
             <DrawerContext.Provider value={{
                 pos: currentPos
             }}>
