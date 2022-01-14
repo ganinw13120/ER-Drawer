@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
-import { ActionType, Box, BoxState, Line, LineType, Point, Position } from "../model/Drawer";
+import { ActionType, Box, BoxState, Line, LineState, LineType, Point, Position } from "../model/Drawer";
 
 type useDrawerType = [
     [
@@ -13,6 +13,10 @@ type useDrawerType = [
     ],
     ActionType,
     (key: number, newState: BoxState) => void,
+    [
+        (key: number, newState: LineState) => void,
+        (key: number) => void,
+    ],
     () => void,
     [
         () => void,
@@ -152,12 +156,23 @@ export const useDrawer = (): useDrawerType => {
             return temp;
         })
     }
+    const setLineState = (key: number, newState: LineState): void => {
+        setLines(prev => {
+            const temp = [...prev];
+            temp[key].state = newState;
+            return temp;
+        })
+    }
+    const deleteLine = (key : number) : void => {
+
+    }
 
     return [
         [boxes, setBoxes],
         [lines, setLines],
         actionType,
         setBoxState,
+        [setLineState, deleteLine],
         clearSelection,
         [onMouseDown, onMouseUp],
         [pos, updateCurrentPosition]

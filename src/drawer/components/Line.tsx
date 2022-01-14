@@ -7,6 +7,7 @@ import generateShortestPath from '../utils/generateShortestPath';
 type LineComponentProps = {
     data: Line
     setLineState: (state: LineState) => void
+    deleteLine : () => void
 }
 
 type LinePath = {
@@ -18,6 +19,11 @@ type LinePath = {
 enum Angle {
     ToLeft,
     ToRight
+}
+
+enum LineColor {
+    Black = '#000000',
+    Blue = '#007EF3'
 }
 
 export type LinePathParameters = {
@@ -38,7 +44,9 @@ export const lineStartTickLength: number = 26;
 export const lineStopTickDistance: number = 20;
 export const lineStopTickSpread: number = 13;
 
-const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState }) => {
+const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState, deleteLine }) => {
+
+    const [state, setState] = useState<LineState>(data.state);
 
     const generateHeadOne = (direction : Angle, pos : Position) : ReactElement[] => {
         const element : ReactElement[] = [];
@@ -101,9 +109,8 @@ const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState }) => 
         }
     }
 
-    const [state, setState] = useState<LineState>(data.state);
-
     useEffect(() => {
+        console.log(state)
         setLineState(state);
     }, [state])
 
@@ -121,13 +128,12 @@ const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState }) => 
             stopPoint: data.stopPoint
         });
         const {startAngle, stopAngle} = linePath;
-        let linePathString = `M `;
-        linePath.checkPoints.forEach((e, i) => {
-            linePathString += `${e.x} ${e.y} ${i === linePath.checkPoints.length - 1 ? '' : ','}`;
-        })
-
-        element.push(generateSvgLine(linePathString))
-
+        let i = 0;
+        while (i < linePath.checkPoints.length-1) {
+            const linePathString = `M ${linePath.checkPoints[i].x} ${linePath.checkPoints[i].y}, ${linePath.checkPoints[i+1].x} ${linePath.checkPoints[i+1].y}`;
+            element.push(generateSvgLine(linePathString))
+            i++;
+        }
         switch (data.startType) {
             case LineType.OnlyOne: {
                 element.push(...generateHeadOne(startAngle, startPos));
@@ -145,9 +151,16 @@ const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState }) => 
         return element
     }
 
-    const generateSvgLine = (path: string): ReactElement => {
-        return <><path onClick={() => { console.log('clicking lines') }} key={uuidv4()} d={path} stroke="black" fill="transparent" strokeWidth="2" /></>
+    const onLineSelect = () => {
+        setState({
+            ...state,
+            isFocus : true
+        })
+    }
 
+    const generateSvgLine = (path: string): ReactElement => {
+        const color = data.state.isFocus ? LineColor.Blue : LineColor.Black;
+        return <><path onMouseDown={() => { onLineSelect() }} key={uuidv4()} d={path} stroke={color} fill="transparent" strokeWidth="2" /></>
     }
 
     return <>

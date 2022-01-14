@@ -16,6 +16,7 @@ const Drawer: React.FC<DrawerProps> = () => {
         [lines, setLines],
         actionType,
         setBoxState,
+        [setLineState, deleteLine],
         clearSelection,
         [onMouseDown, onMouseUp],
         [currentPos, setCurrentPos],
@@ -42,10 +43,13 @@ const Drawer: React.FC<DrawerProps> = () => {
     const generateLineElement = (): ReactElement[] => {
         let list: ReactElement[] = [];
         lines.forEach((e, key) => {
-            const setLineState = (state: LineState) => {
-
+            const _setLineState = (state: LineState) => {
+                setLineState(key, state);
             }
-            list.push(<Line data={e} setLineState={setLineState} />)
+            const _deleteLine = () : void => {
+                deleteLine(key);
+            }
+            list.push(<Line data={e} setLineState={_setLineState} deleteLine={_deleteLine} />)
         })
         return list;
     }
@@ -66,7 +70,7 @@ const Drawer: React.FC<DrawerProps> = () => {
             }}>
                 <a style={{ position: 'absolute' }}>{actionType}</a>
                 {/* <button onClick={onClear} style={{ position: 'absolute' }}>Clear</button> */}
-                <div ref={containerRef} onMouseMove={handleMouseMove} className={`container`} onMouseDown={onMouseDown} onMouseUp={onMouseUp}>
+                <div onKeyDown={(e)=>{console.log(e)}} ref={containerRef} onMouseMove={handleMouseMove} className={`container`} onMouseDown={onMouseDown} onMouseUp={onMouseUp}>
                     {(() => {
                         let _boxes: Array<ReactElement> = [];
                         boxes.forEach((e, key) => {
