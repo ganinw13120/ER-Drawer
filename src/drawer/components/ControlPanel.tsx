@@ -25,16 +25,16 @@ type ControlPanelProps = {
     addField : () => void
 }
 
-const ControlPanel: React.FC<ControlPanelProps> = () => {
+const ControlPanel: React.FC<ControlPanelProps> = ({deleteItem, addRelation, changeFields, addField}) => {
     return <>
         <ThemeProvider theme={theme}>
             <div className='panel-container'>
                 <div className='panel'>
                     <div className='panel-item-group'>
-                        <Button variant="outlined" color="secondary"><AddIcon /> <WysiwygIcon /></Button>
+                        <Button variant="outlined" color="secondary" ><AddIcon /> <WysiwygIcon /></Button>
                     </div>
                     <div className='panel-item-group'>
-                        <Button variant="outlined" color="secondary"><DeleteIcon /></Button>
+                        <Button variant="outlined" color="secondary" onClick={deleteItem}><DeleteIcon /></Button>
                     </div>
                     <BoxPanel />
                     <LinePanel />

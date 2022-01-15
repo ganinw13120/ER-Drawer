@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
-import { ActionType, Box, BoxState, Line, LineState, LineType, Point, Position } from "../model/Drawer";
+import { ActionType, Box, BoxState, Entity, Line, LineState, LineType, Point, Position } from "../model/Drawer";
 
 type TUseDrawer= [
     {
@@ -149,6 +149,17 @@ export const useDrawer = (): TUseDrawer => {
         })
     }
 
+    const clearBoxesFocus = () => {
+        setBoxes(prev => {
+            return [...prev].map(e=>{e.state.isSelect=false; return e;});            
+        })
+    }
+    const clearLineFocus = () => {
+        setLines(prev => {
+            return [...prev].map(e=>{e.state.isFocus=false; return e;});            
+        })
+    }
+    
     const setBoxState = (key: number, newState: BoxState): void => {
         setBoxes(prev => {
             const temp = [...prev];
@@ -158,19 +169,43 @@ export const useDrawer = (): TUseDrawer => {
             temp[key].state = newState;
             return temp;
         })
+        if (newState.isSelect) clearLineFocus();
     }
+
     const setLineState = (key: number, newState: LineState): void => {
         setLines(prev => {
             const temp = [...prev];
             temp[key].state = newState;
             return temp;
         })
+        if (newState.isFocus) clearBoxesFocus();
     }
-    const deleteLine = (key : number) : void => {
 
+    const getCurrentFocus = () : Entity | null => {
+        const box = boxes.find(e=>e.state.isSelect);
+        if (box) return box;
+        const line = lines.find(e=>e.state.isFocus);
+        if (line) return line;
+        return null;
     }
+
     const deleteItem = () : void => {
-
+        // console.log(typeof getCurrentFocus() === typeof lines)
+        const focus = getCurrentFocus();
+        if (!focus) return;
+        if ((focus as Box).title!==undefined) {
+            setBoxes((prev)=>{
+                let temp = [...prev];
+                temp = temp.filter(e=>e.uuid!==focus.uuid);
+                return temp;
+            })
+        } else {
+            setLines((prev)=>{
+                let temp = [...prev];
+                temp = temp.filter(e=>e.uuid!==focus.uuid);
+                return temp;
+            })
+        }
     }
     const addRelation = () : void => {
 

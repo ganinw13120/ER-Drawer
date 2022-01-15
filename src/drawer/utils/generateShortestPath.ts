@@ -42,15 +42,12 @@ const generateShortestPath = (param: LinePathParameters): Position[] => {
                         )
                     }
                 } else {
-                    console.log('Case 0')
                     if (startPos.x > stopPos.x) {
-                        console.log('Case 1')
                         path.push(
                             getRoundBottomLeft(param),
                         )
                     }
                     else {
-                        console.log('Case 2')
                         path.push(
                             getRoundBottomLeft(param)
                         )

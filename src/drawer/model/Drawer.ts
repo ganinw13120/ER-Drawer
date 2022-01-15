@@ -21,7 +21,7 @@ export type Line = {
     state : LineState
 }
 
-export type Entity = Box
+export type Entity = Box | Line
 
 export type LineState = {
     isFocus : boolean
