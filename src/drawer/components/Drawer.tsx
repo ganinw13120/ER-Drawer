@@ -13,19 +13,18 @@ const Drawer: React.FC<DrawerProps> = () => {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const [
-        [boxes, setBoxes],
-        [lines, setLines],
+        boxes,
+        lines,
         actionType,
-        setBoxState,
-        [setLineState, deleteLine],
         clearSelection,
-        [onMouseDown, onMouseUp],
+        mouseEvent,
         [currentPos, setCurrentPos],
+        panelFunc
     ] = useDrawer();
 
     useEffect(() => {
-        setLines([]);
-        setBoxes([
+        lines.setLines([]);
+        boxes.setBoxes([
             generateBox('นักเรียน', ['รหัสนักเรียน', 'ชื่อจริง', 'นามสกุล', 'เบอร์โทร', 'วันเกิด']),
             generateBox('นักเลง', ['รหัสนักเรียน', 'ชื่อจริง', 'นามสกุล', 'เบอร์โทร', 'วันเกิด', 'ที่อยู่']),
             generateBox('Customer', ['cusomter_id', 'full_name', 'mobile_no', 'password', 'created_at', 'updated_at']),
@@ -43,20 +42,17 @@ const Drawer: React.FC<DrawerProps> = () => {
 
     const generateLineElement = (): ReactElement[] => {
         let list: ReactElement[] = [];
-        lines.forEach((e, key) => {
+        lines.lines.forEach((e, key) => {
             const _setLineState = (state: LineState) => {
-                setLineState(key, state);
+                lines.setLineState(key, state);
             }
-            const _deleteLine = () : void => {
-                deleteLine(key);
-            }
-            list.push(<Line data={e} setLineState={_setLineState} deleteLine={_deleteLine} />)
+            list.push(<Line data={e} setLineState={_setLineState} />)
         })
         return list;
     }
 
     const onClear = () => {
-        setLines([]);
+        lines.setLines([]);
     }
 
     const onBackgroundClick = () => {
@@ -66,18 +62,18 @@ const Drawer: React.FC<DrawerProps> = () => {
     return (
         <>
             <Stat />
-            <ControlPanel />
+            <ControlPanel {...panelFunc} />
             <DrawerContext.Provider value={{
                 pos: currentPos
             }}>
                 <a style={{ position: 'absolute' }}>{actionType}</a>
                 {/* <button onClick={onClear} style={{ position: 'absolute' }}>Clear</button> */}
-                <div onKeyDown={(e)=>{console.log(e)}} ref={containerRef} onMouseMove={handleMouseMove} className={`container`} onMouseDown={onMouseDown} onMouseUp={onMouseUp}>
+                <div onKeyDown={(e)=>{console.log(e)}} ref={containerRef} onMouseMove={handleMouseMove} className={`container`} onMouseDown={mouseEvent.onMouseDown} onMouseUp={mouseEvent.onMouseUp}>
                     {(() => {
                         let _boxes: Array<ReactElement> = [];
-                        boxes.forEach((e, key) => {
+                        boxes.boxes.forEach((e, key) => {
                             const _setBoxState = (state: BoxState) => {
-                                setBoxState(key, state);
+                                boxes.setBoxState(key, state);
                             }
                             _boxes.push(<React.Fragment key={key}>
                                 <BoxComponent data={e} setBoxState={_setBoxState} />

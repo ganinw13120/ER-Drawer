@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useReducer, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { Box, BoxState, Point, PointPosition, Position } from '../model/Drawer';
 import { v4 as uuidv4 } from 'uuid';
 import { useDrawerContext } from '../hooks/useDrawerContext';
@@ -208,6 +208,7 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
                 <div className={`box-inner-container ${state.isSelect && !state.isDragging ? 'box-select' : ''} ${state.isDragging ? 'box-dragging' : ''} `}>
                     <div className='box-header' ref={data.title.ref}>
                         {data.title.text}
+                        {/* <span className="input" role="textbox" contentEditable>99</span> */}
                     </div>
                     {(() => {
                         const details: Array<ReactElement> = [];

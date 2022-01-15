@@ -7,7 +7,6 @@ import generateShortestPath from '../utils/generateShortestPath';
 type LineComponentProps = {
     data: Line
     setLineState: (state: LineState) => void
-    deleteLine : () => void
 }
 
 type LinePath = {
@@ -44,7 +43,7 @@ export const lineStartTickLength: number = 26;
 export const lineStopTickDistance: number = 20;
 export const lineStopTickSpread: number = 13;
 
-const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState, deleteLine }) => {
+const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState }) => {
 
     const [state, setState] = useState<LineState>(data.state);
 

@@ -2,30 +2,33 @@ import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { ActionType, Box, BoxState, Line, LineState, LineType, Point, Position } from "../model/Drawer";
 
-type useDrawerType = [
-    [
-        Box[],
-        React.Dispatch<React.SetStateAction<Box[]>>
-    ],
-    [
-        Line[],
-        React.Dispatch<React.SetStateAction<Line[]>>
-    ],
+type TUseDrawer= [
+    {
+        boxes : Box[],
+        setBoxes : React.Dispatch<React.SetStateAction<Box[]>>,
+        setBoxState : (key: number, newState: BoxState) => void
+    },
+    {
+        lines : Line[],
+        setLines : React.Dispatch<React.SetStateAction<Line[]>>,
+        setLineState : (key: number, newState: LineState) => void,
+    },
     ActionType,
-    (key: number, newState: BoxState) => void,
-    [
-        (key: number, newState: LineState) => void,
-        (key: number) => void,
-    ],
     () => void,
-    [
-        () => void,
-        () => void,
-    ],
-    [Position, (pos: Position) => void]
+    {
+        onMouseDown : () => void,
+        onMouseUp : () => void,
+    },
+    [Position, (pos: Position) => void],
+    {
+        deleteItem : () => void,
+        addRelation : () => void,
+        changeFields : (amount : number) => void,
+        addField : () => void
+    }
 ]
 
-export const useDrawer = (): useDrawerType => {
+export const useDrawer = (): TUseDrawer => {
 
     const [actionType, setActionType] = useState<ActionType>(ActionType.None);
 
@@ -166,16 +169,43 @@ export const useDrawer = (): useDrawerType => {
     const deleteLine = (key : number) : void => {
 
     }
+    const deleteItem = () : void => {
+
+    }
+    const addRelation = () : void => {
+
+    }
+    const changeFields = (amount : number) : void => {
+
+    }
+    const addField = () : void => {
+
+    }
 
     return [
-        [boxes, setBoxes],
-        [lines, setLines],
+        {
+            boxes : boxes,
+            setBoxes : setBoxes,
+            setBoxState : setBoxState
+        },
+        {
+            lines : lines, 
+            setLines : setLines, 
+            setLineState : setLineState
+        },
         actionType,
-        setBoxState,
-        [setLineState, deleteLine],
         clearSelection,
-        [onMouseDown, onMouseUp],
-        [pos, updateCurrentPosition]
+        {
+            onMouseDown : onMouseDown,
+            onMouseUp : onMouseUp,
+        },
+        [pos, updateCurrentPosition],
+        {
+            deleteItem : deleteItem,
+            addRelation : addRelation,
+            changeFields : changeFields,
+            addField : addField
+        }
     ]
 
 }
