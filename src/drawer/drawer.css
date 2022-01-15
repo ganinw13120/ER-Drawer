@@ -48,6 +48,8 @@
   padding-right : 20px;
   background-color: #3766BA;
   color : white;
+  height : 30px;
+  min-width: 50px;
   font-size : 20px;
 }
 .box-detail {
@@ -108,6 +110,7 @@
 .input,
 .textarea {
   /* border: 1px solid #ccc; */
+  /* height: 100px; */
   font-family: inherit;
   font-size: inherit;
   padding: 1px 6px;

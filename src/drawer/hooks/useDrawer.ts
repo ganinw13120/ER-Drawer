@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { ActionType, Box, BoxState, Entity, Line, LineState, LineType, Point, Position } from "../model/Drawer";
+import generateBox from "../utils/generateBox";
 
 type TUseDrawer= [
     {
@@ -208,7 +209,11 @@ export const useDrawer = (): TUseDrawer => {
         }
     }
     const addRelation = () : void => {
-
+        setBoxes(prev=>{
+            const temp = [...prev];
+            temp.push(generateBox(" ", []))
+            return temp;
+        })
     }
     const changeFields = (amount : number) : void => {
 

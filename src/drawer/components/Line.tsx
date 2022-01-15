@@ -109,7 +109,6 @@ const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState }) => 
     }
 
     useEffect(() => {
-        console.log(state)
         setLineState(state);
     }, [state])
 

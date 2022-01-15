@@ -31,7 +31,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({deleteItem, addRelation, cha
             <div className='panel-container'>
                 <div className='panel'>
                     <div className='panel-item-group'>
-                        <Button variant="outlined" color="secondary" ><AddIcon /> <WysiwygIcon /></Button>
+                        <Button variant="outlined" color="secondary" onClick={addRelation}><AddIcon /> <WysiwygIcon /></Button>
                     </div>
                     <div className='panel-item-group'>
                         <Button variant="outlined" color="secondary" onClick={deleteItem}><DeleteIcon /></Button>

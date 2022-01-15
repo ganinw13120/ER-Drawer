@@ -208,7 +208,7 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
                 <div className={`box-inner-container ${state.isSelect && !state.isDragging ? 'box-select' : ''} ${state.isDragging ? 'box-dragging' : ''} `}>
                     <div className='box-header' ref={data.title.ref}>
                         {data.title.text}
-                        {/* <span className="input" role="textbox" contentEditable>99</span> */}
+                        {/* <span className="input" role="textbox" contentEditable onChange={(e)=>{console.log(e.target)}}>99</span> */}
                     </div>
                     {(() => {
                         const details: Array<ReactElement> = [];
@@ -240,7 +240,6 @@ type PointComponentProps = {
 
 const PointComponent: React.FC<PointComponentProps> = ({ data, onHoverPoint, onUnHoverPoint, pos }) => {
     const pointR = 2.5;
-    const pointTranslateX = (pointHitbox / 2) - (pointR * 1);
     return (<>
         <svg key={data.uuid} ref={data.ref} onMouseEnter={() => { onHoverPoint() }} onMouseLeave={() => { onUnHoverPoint() }} style={{ padding: `${pointR * 3}px`,cursor: 'pointer', position: 'absolute', top: 0, zIndex: 10, width: `${pointHitbox}px`, height: `${pointHitbox}px`, transform: `translate(${pos.x - (pointHitbox / 2)}px, ${pos.y}px)` }}>
             {data.isHover && <circle cx={pointR * 4} cy={pointR * 4} r={pointR * 2} fill="#d99a9a" />}
