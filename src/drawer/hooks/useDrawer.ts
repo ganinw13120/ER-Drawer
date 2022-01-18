@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
-import { ActionType, Box, BoxState, Entity, Line, LineState, LineType, Point, Position } from "../model/Drawer";
+import { ActionType, Box, BoxState, Entity, Line, LineState, LineType, Point, Position, UserState } from "../model/Drawer";
 import generateBox from "../utils/generateBox";
 
 type TUseDrawer= [
@@ -14,7 +14,7 @@ type TUseDrawer= [
         setLines : React.Dispatch<React.SetStateAction<Line[]>>,
         setLineState : (key: number, newState: LineState) => void,
     },
-    ActionType,
+    UserState,
     () => void,
     {
         onMouseDown : () => void,
@@ -32,6 +32,8 @@ type TUseDrawer= [
 export const useDrawer = (): TUseDrawer => {
 
     const [actionType, setActionType] = useState<ActionType>(ActionType.None);
+
+    const [focusBox, setFocusBox] = useState<Box | null>(null);
 
     const [focusEntity, setFocusEntity] = useState<Point | null>(null);
 
@@ -74,6 +76,11 @@ export const useDrawer = (): TUseDrawer => {
         }
         else {
             checkAction();
+        }
+        if (boxes.find(e=>e.state.isSelect)) {
+            setFocusBox(boxes.find(e=>e.state.isSelect)!);
+        } else {
+            setFocusBox(null);
         }
     }, [boxes]);
 
@@ -194,7 +201,7 @@ export const useDrawer = (): TUseDrawer => {
         // console.log(typeof getCurrentFocus() === typeof lines)
         const focus = getCurrentFocus();
         if (!focus) return;
-        if ((focus as Box).title!==undefined) {
+        if ((focus as Box).state.title!==undefined) {
             setBoxes((prev)=>{
                 let temp = [...prev];
                 temp = temp.filter(e=>e.uuid!==focus.uuid);
@@ -233,7 +240,11 @@ export const useDrawer = (): TUseDrawer => {
             setLines : setLines, 
             setLineState : setLineState
         },
-        actionType,
+        {
+            Action : actionType,
+            BoxSelection : focusBox,
+            LineSelection : focusLine
+        },
         clearSelection,
         {
             onMouseDown : onMouseDown,

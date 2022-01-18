@@ -37,12 +37,12 @@ export enum LineType {
 export type Box = {
     uuid: string
     ref: React.RefObject<HTMLDivElement>
-    title: BoxTitle
-    entities: Array<BoxEntity>
     state: BoxState
 }
 
 export type BoxState = {
+    title: BoxTitle
+    entities: Array<BoxEntity>
     isSelect: boolean
     isHover: boolean
     isDragging: boolean
@@ -80,4 +80,10 @@ export enum ActionType {
     Focus = 'Focus',
     Draw = 'Draw',
     DrawReady = 'DrawReady',
+}
+
+export type UserState = {
+    Action : ActionType
+    BoxSelection : Box | null
+    LineSelection : Line | null
 }

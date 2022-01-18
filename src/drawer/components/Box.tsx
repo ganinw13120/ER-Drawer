@@ -2,6 +2,7 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { Box, BoxState, Point, PointPosition, Position } from '../model/Drawer';
 import { v4 as uuidv4 } from 'uuid';
 import { useDrawerContext } from '../hooks/useDrawerContext';
+import ContentEditable, { ContentEditableEvent } from 'react-contenteditable'
 
 const pointHitbox: number = 30;
 
@@ -57,17 +58,17 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
             ref: TitleL,
             box: data,
             position: PointPosition.Left,
-            parentRef: data.title.ref
+            parentRef: state.title.ref
         })
         _points.push({
             uuid: uuidv4(),
             isHover: false,
             ref: TitleR,
             position: PointPosition.Right,
-            parentRef: data.title.ref,
+            parentRef: state.title.ref,
             box: data
         })
-        data.entities.forEach(en => {
+        state.entities.forEach(en => {
             const L = React.createRef<SVGSVGElement>();
             const R = React.createRef<SVGSVGElement>();
             _points.push({
@@ -184,6 +185,23 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
             stopDrag();
         }
     }
+    const onChangeTitle = (event: ContentEditableEvent) => {
+        setState({
+            ...state,
+            title : {
+                ...state.title,
+                text : event.target.value
+            }
+        })
+    }
+    const onChangeEntity = (event: ContentEditableEvent, key : number) => {
+        let temp = [...state.entities];
+        temp[key].text = event.target.value;
+        setState({
+            ...state,
+            entities : temp
+        })
+    }
 
     return (
         <>
@@ -206,16 +224,29 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
                 }}
             >
                 <div className={`box-inner-container ${state.isSelect && !state.isDragging ? 'box-select' : ''} ${state.isDragging ? 'box-dragging' : ''} `}>
-                    <div className='box-header' ref={data.title.ref}>
-                        {data.title.text}
-                        {/* <span className="input" role="textbox" contentEditable onChange={(e)=>{console.log(e.target)}}>99</span> */}
+                    <div className='box-header' ref={state.title.ref}>
+                        {/* {data.title.text} */}
+                        <ContentEditable
+                            html={state.title.text ? state.title.text : ''}
+                            disabled={false} 
+                            onChange={onChangeTitle} 
+                            tagName='div'
+                            className='inp-field'
+                        />
                     </div>
                     {(() => {
                         const details: Array<ReactElement> = [];
-                        data.entities.forEach((entity, key) => {
+                        state.entities.forEach((entity, key) => {
                             details.push(<React.Fragment key={key}>
                                 <div className={`${key % 2 === 0 ? 'row-even' : 'row-odd'} box-detail`} ref={entity.ref}>
-                                    {entity.text}
+                                    {/* {entity.text} */}
+                                    <ContentEditable
+                                        html={entity.text}
+                                        disabled={false} 
+                                        onChange={(e) => {onChangeEntity(e, key)}} 
+                                        tagName='div'
+                                        className='inp-field'
+                                    />
                                 </div>
                             </React.Fragment>)
                         })

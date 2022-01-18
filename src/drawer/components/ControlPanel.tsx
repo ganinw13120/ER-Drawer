@@ -7,6 +7,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { TextField } from '@mui/material';
 import BorderTopIcon from '@mui/icons-material/BorderTop';
 import BorderBottomIcon from '@mui/icons-material/BorderBottom';
+import { ActionType, UserState } from '../model/Drawer';
+
 const theme = createTheme({
     palette: {
         primary: {
@@ -19,13 +21,14 @@ const theme = createTheme({
 });
 
 type ControlPanelProps = {
-    deleteItem : () => void,
-    addRelation : () => void,
-    changeFields : (amount : number) => void,
-    addField : () => void
+    deleteItem: () => void
+    addRelation: () => void
+    changeFields: (amount: number) => void
+    addField: () => void
+    userState: UserState
 }
 
-const ControlPanel: React.FC<ControlPanelProps> = ({deleteItem, addRelation, changeFields, addField}) => {
+const ControlPanel: React.FC<ControlPanelProps> = ({ deleteItem, addRelation, changeFields, addField, userState }) => {
     return <>
         <ThemeProvider theme={theme}>
             <div className='panel-container'>
@@ -36,8 +39,12 @@ const ControlPanel: React.FC<ControlPanelProps> = ({deleteItem, addRelation, cha
                     <div className='panel-item-group'>
                         <Button variant="outlined" color="secondary" onClick={deleteItem}><DeleteIcon /></Button>
                     </div>
-                    <BoxPanel />
-                    <LinePanel />
+                    {userState.BoxSelection &&
+                        <BoxPanel />
+                    }
+                    {userState.LineSelection &&
+                        <LinePanel />
+                    }
                 </div>
             </div>
         </ThemeProvider>

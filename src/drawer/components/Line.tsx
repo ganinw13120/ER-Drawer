@@ -1,5 +1,5 @@
-import React, { ReactElement, useEffect, useRef, useState } from 'react';
-import { Box, Line, LineState, LineType, Point, Position } from '../model/Drawer';
+import React, { ReactElement, useEffect, useState } from 'react';
+import { Line, LineState, LineType, Point, Position } from '../model/Drawer';
 import { v4 as uuidv4 } from 'uuid';
 import parseClientRectsToPosition from '../utils/parseClientRectsToPosition';
 import generateShortestPath from '../utils/generateShortestPath';
@@ -82,20 +82,6 @@ const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState }) => 
     }
 
     const generateLinePath = (param: LinePathParameters): LinePath => {
-        const {
-            startPos,
-            stopPos,
-            startPoint,
-            stopPoint,
-        } = param;
-        const middlePositionStart: Position = {
-            x: (startPos.x + stopPos.x) / 2,
-            y: startPos.y,
-        }
-        const middlePositionStop: Position = {
-            x: (startPos.x + stopPos.x) / 2,
-            y: stopPos.y,
-        }
 
         const shortestPath = generateShortestPath(param);
         const stopAngle = shortestPath[shortestPath.length-1].x < shortestPath[shortestPath.length-2].x ? Angle.ToLeft : Angle.ToRight;

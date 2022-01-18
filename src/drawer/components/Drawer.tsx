@@ -15,7 +15,7 @@ const Drawer: React.FC<DrawerProps> = () => {
     const [
         boxes,
         lines,
-        actionType,
+        userState,
         clearSelection,
         mouseEvent,
         [currentPos, setCurrentPos],
@@ -51,10 +51,6 @@ const Drawer: React.FC<DrawerProps> = () => {
         return list;
     }
 
-    const onClear = () => {
-        lines.setLines([]);
-    }
-
     const onBackgroundClick = () => {
         clearSelection();
     }
@@ -62,13 +58,12 @@ const Drawer: React.FC<DrawerProps> = () => {
     return (
         <>
             <Stat />
-            <ControlPanel {...panelFunc} />
+            <ControlPanel {...panelFunc} userState={userState}/>
             <DrawerContext.Provider value={{
                 pos: currentPos
             }}>
-                <a style={{ position: 'absolute' }}>{actionType}</a>
                 {/* <button onClick={onClear} style={{ position: 'absolute' }}>Clear</button> */}
-                <div onKeyDown={(e)=>{console.log(e)}} ref={containerRef} onMouseMove={handleMouseMove} className={`container`} onMouseDown={mouseEvent.onMouseDown} onMouseUp={mouseEvent.onMouseUp}>
+                <div ref={containerRef} onMouseMove={handleMouseMove} className={`container`} onMouseDown={mouseEvent.onMouseDown} onMouseUp={mouseEvent.onMouseUp}>
                     {(() => {
                         let _boxes: Array<ReactElement> = [];
                         boxes.boxes.forEach((e, key) => {

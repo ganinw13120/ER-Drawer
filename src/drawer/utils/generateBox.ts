@@ -16,15 +16,15 @@ const generateBox = (title: string, entities: Array<string>): Box => {
     const box: Box = {
         ref: ref,
         uuid: uuidv4(),
-        title: {
-            text: title,
-            ref: refTitle
-        },
-        entities: entityList,
         state: {
             isDragging: false,
             isHover: false,
             isSelect: false,
+            title: {
+                text: title,
+                ref: refTitle
+            },
+            entities: entityList,
             pos: {
                 x: 0,
                 y: 0

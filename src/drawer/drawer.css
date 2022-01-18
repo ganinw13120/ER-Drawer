@@ -115,3 +115,6 @@
   font-size: inherit;
   padding: 1px 6px;
 }
+.inp-field {
+   min-width: 40px;
+}

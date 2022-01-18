@@ -228,7 +228,6 @@ const getRountUp = (param: LinePathParameters): Position[] => {
         startPos,
         stopPos,
         startPoint,
-        stopPoint,
     } = param;
     const startBox = startPoint?.box;
     const startBoxRect = startBox?.ref.current?.getClientRects()[0];
