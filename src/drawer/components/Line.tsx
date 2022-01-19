@@ -102,6 +102,9 @@ const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState }) => 
 
         let element: ReactElement[] = [];
 
+        console.log(data.startRef!.current!.getClientRects()[0])
+        console.log(data.startRef!.current!.getBoundingClientRect())
+
         const startPos = data.startRef?.current ? parseClientRectsToPosition(data.startRef.current!.getClientRects()[0], pointOffset) : data.startPosition!
         const stopPos = data.stopRef?.current ? parseClientRectsToPosition(data.stopRef.current!.getClientRects()[0], pointOffset) : data.stopPosition!
 

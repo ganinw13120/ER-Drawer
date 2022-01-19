@@ -34,8 +34,8 @@ const Drawer: React.FC<DrawerProps> = () => {
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         let current: Position = {
-            x: e.pageX,
-            y: e.pageY
+            x: e.pageX - containerRef.current!.getClientRects()[0].x,
+            y: e.pageY - containerRef.current!.getClientRects()[0].y
         }
         setCurrentPos(current);
     }
