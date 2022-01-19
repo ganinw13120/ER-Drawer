@@ -3,6 +3,7 @@ import { Line, LineState, LineType, Point, Position } from '../model/Drawer';
 import { v4 as uuidv4 } from 'uuid';
 import parseClientRectsToPosition from '../utils/parseClientRectsToPosition';
 import generateShortestPath from '../utils/generateShortestPath';
+import { useDrawerContext } from '../hooks/useDrawerContext';
 
 type LineComponentProps = {
     data: Line
@@ -46,6 +47,7 @@ export const lineStopTickSpread: number = 13;
 const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState }) => {
 
     const [state, setState] = useState<LineState>(data.state);
+    const { pos: currentPos, offset } = useDrawerContext();
 
     const generateHeadOne = (direction : Angle, pos : Position) : ReactElement[] => {
         const element : ReactElement[] = [];
@@ -105,8 +107,8 @@ const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState }) => 
         console.log(data.startRef!.current!.getClientRects()[0])
         console.log(data.startRef!.current!.getBoundingClientRect())
 
-        const startPos = data.startRef?.current ? parseClientRectsToPosition(data.startRef.current!.getClientRects()[0], pointOffset) : data.startPosition!
-        const stopPos = data.stopRef?.current ? parseClientRectsToPosition(data.stopRef.current!.getClientRects()[0], pointOffset) : data.stopPosition!
+        const startPos = data.startRef?.current ? parseClientRectsToPosition(data.startRef.current!.getClientRects()[0], pointOffset, offset) : data.startPosition!
+        const stopPos = data.stopRef?.current ? parseClientRectsToPosition(data.stopRef.current!.getClientRects()[0], pointOffset, offset) : data.stopPosition!
 
         const linePath = generateLinePath({
             startPos: startPos,

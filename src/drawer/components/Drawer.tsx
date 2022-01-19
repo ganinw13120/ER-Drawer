@@ -60,7 +60,11 @@ const Drawer: React.FC<DrawerProps> = () => {
             <Stat />
             <ControlPanel {...panelFunc} userState={userState}/>
             <DrawerContext.Provider value={{
-                pos: currentPos
+                pos: currentPos,
+                offset : {
+                    x : containerRef.current!.getClientRects()[0].x,
+                    y : containerRef.current!.getClientRects()[0].y
+                }
             }}>
                 {/* <button onClick={onClear} style={{ position: 'absolute' }}>Clear</button> */}
                 <div ref={containerRef} onMouseMove={handleMouseMove} className={`container`} onMouseDown={mouseEvent.onMouseDown} onMouseUp={mouseEvent.onMouseUp}>
