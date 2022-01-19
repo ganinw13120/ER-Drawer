@@ -58,12 +58,12 @@ const Drawer: React.FC<DrawerProps> = () => {
     return (
         <>
             <Stat />
-            <ControlPanel {...panelFunc} userState={userState}/>
+            <ControlPanel {...panelFunc} userState={userState} />
             <DrawerContext.Provider value={{
                 pos: currentPos,
-                offset : {
-                    x : containerRef.current!.getClientRects()[0].x,
-                    y : containerRef.current!.getClientRects()[0].y
+                offset: {
+                    x: containerRef.current ? containerRef.current!.getClientRects()[0].x : 0,
+                    y: containerRef.current ? containerRef.current!.getClientRects()[0].y : 0
                 }
             }}>
                 {/* <button onClick={onClear} style={{ position: 'absolute' }}>Clear</button> */}
