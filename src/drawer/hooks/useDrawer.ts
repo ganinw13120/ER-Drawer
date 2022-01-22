@@ -119,18 +119,24 @@ export const useDrawer = (): TUseDrawer => {
 
     const stopDrawing = (): void => {
         if (!focusLine) return;
-        setLines((prev) => {
-            const temp = [...prev];
-            if (focusEntity) {
-                temp.find(e => e.uuid === focusLine.uuid)!.stopRef = focusEntity.ref;
-                temp.find(e => e.uuid === focusLine.uuid)!.stopPoint = focusEntity;
-                temp.find(e => e.uuid === focusLine.uuid)!.stopPosition = undefined;
-            } else {
-                temp.find(e => e.uuid === focusLine.uuid)!.stopPosition = pos;
-                temp.find(e => e.uuid === focusLine.uuid)!.stopRef = undefined;
-            }
-            return temp;
-        })
+        if (focusEntity && focusLine.startPoint && focusLine.startPoint.box.uuid === focusEntity.box.uuid) {
+            setLines(prev=>{
+                return prev.filter(e=>e.uuid!=focusLine.uuid);
+            })
+        } else {
+            setLines((prev) => {
+                const temp = [...prev];
+                if (focusEntity) {
+                    temp.find(e => e.uuid === focusLine.uuid)!.stopRef = focusEntity.ref;
+                    temp.find(e => e.uuid === focusLine.uuid)!.stopPoint = focusEntity;
+                    temp.find(e => e.uuid === focusLine.uuid)!.stopPosition = undefined;
+                } else {
+                    temp.find(e => e.uuid === focusLine.uuid)!.stopPosition = pos;
+                    temp.find(e => e.uuid === focusLine.uuid)!.stopRef = undefined;
+                }
+                return temp;
+            })
+        }
         setFocusLine(null);
         setActionType(ActionType.None);
     }
@@ -201,6 +207,9 @@ export const useDrawer = (): TUseDrawer => {
         const focus = getCurrentFocus();
         if (!focus) return;
         if ((focus as Box).state.title!==undefined) {
+            setLines((prev)=>{
+                return prev.filter(e=>e.startPoint?.box.uuid!==focus.uuid && e.stopPoint?.box.uuid!==focus.uuid);
+            })
             setBoxes((prev)=>{
                 let temp = [...prev];
                 temp = temp.filter(e=>e.uuid!==focus.uuid);
@@ -217,7 +226,7 @@ export const useDrawer = (): TUseDrawer => {
     const addRelation = () : void => {
         setBoxes(prev=>{
             const temp = [...prev];
-            temp.push(generateBox(" ", []))
+            temp.push(generateBox("", []))
             return temp;
         })
     }
