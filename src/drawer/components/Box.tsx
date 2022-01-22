@@ -46,7 +46,7 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
     useEffect(() => {
         setPoints([]);
         generatePoints();
-    }, [data])
+    }, [data, state.entities.length])
 
     const generatePoints = () => {
         const _points: Array<Point> = [];
@@ -88,6 +88,7 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
                 box: data
             })
         })
+        console.log(_points.length);
         setPoints(_points);
     }
 

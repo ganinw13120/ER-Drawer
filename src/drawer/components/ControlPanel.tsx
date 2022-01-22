@@ -24,7 +24,7 @@ type ControlPanelProps = {
     deleteItem: () => void
     addRelation: () => void
     changeFields: (amount: number) => void
-    addField: () => void
+    addField : (type : 'Buttom' | 'Top') => void
     userState: UserState
 }
 
@@ -36,11 +36,14 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ deleteItem, addRelation, ch
                     <div className='panel-item-group'>
                         <Button variant="outlined" color="secondary" onClick={addRelation}><AddIcon /> <WysiwygIcon /></Button>
                     </div>
-                    <div className='panel-item-group'>
-                        <Button variant="outlined" color="secondary" onClick={deleteItem}><DeleteIcon /></Button>
-                    </div>
+                    {
+                        (userState.BoxSelection || userState.LineSelection) &&
+                        <div className='panel-item-group'>
+                            <Button variant="outlined" color="secondary" onClick={deleteItem}><DeleteIcon /></Button>
+                        </div>
+                    }
                     {userState.BoxSelection &&
-                        <BoxPanel />
+                        <BoxPanel changeFields={changeFields} addField={addField} fieldAmount={userState.BoxSelection.state.entities.length}/>
                     }
                     {userState.LineSelection &&
                         <LinePanel />
@@ -51,23 +54,31 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ deleteItem, addRelation, ch
     </>
 }
 
-const BoxPanel: React.FC = () => {
+type BoxPanelProps = {
+    changeFields: (amount: number) => void
+    addField : (type : 'Buttom' | 'Top') => void
+    fieldAmount : number
+}
+
+const BoxPanel: React.FC<BoxPanelProps> = ({changeFields, addField, fieldAmount}) => {
     return <>
         <div className='panel-item-group'>
             <div className='panel-label'>
                 Fields :
             </div>
             <div className='number-inp-container mr-r'>
-                <TextField size='small' type={"number"} defaultValue={1} />
+                <TextField size='small' type={"number"} value={fieldAmount} onChange={(e)=>{
+                    changeFields(Number(e.target.value));
+                }}/>
             </div>
             <div className='panel-label'>
                 Add :
             </div>
             <div className='panel-btn-container'>
-                <Button variant="outlined" color="secondary" className="panel-btn-container"><BorderTopIcon /></Button>
+                <Button variant="outlined" color="secondary" className="panel-btn-container" onClick={e=>{addField("Top")}}><BorderTopIcon /></Button>
             </div>
             <div className='panel-btn-container'>
-                <Button variant="outlined" color="secondary" className="panel-btn-container"><BorderBottomIcon /></Button>
+                <Button variant="outlined" color="secondary" className="panel-btn-container" onClick={e=>{addField("Buttom")}}><BorderBottomIcon /></Button>
             </div>
         </div>
     </>

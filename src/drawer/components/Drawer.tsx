@@ -73,9 +73,9 @@ const Drawer: React.FC<DrawerProps> = () => {
                         let _boxes: Array<ReactElement> = [];
                         boxes.boxes.forEach((e, key) => {
                             const _setBoxState = (state: BoxState) => {
-                                boxes.setBoxState(key, state);
+                                boxes.setBoxState(e.uuid, state);
                             }
-                            _boxes.push(<React.Fragment key={key}>
+                            _boxes.push(<React.Fragment key={e.uuid}>
                                 <BoxComponent data={e} setBoxState={_setBoxState} />
                             </React.Fragment>)
                         })

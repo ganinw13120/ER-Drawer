@@ -1,3 +1,4 @@
+import React from "react";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { ActionType, Box, BoxState, Entity, Line, LineState, LineType, Point, Position, UserState } from "../model/Drawer";
@@ -7,7 +8,7 @@ type TUseDrawer= [
     {
         boxes : Box[],
         setBoxes : React.Dispatch<React.SetStateAction<Box[]>>,
-        setBoxState : (key: number, newState: BoxState) => void
+        setBoxState : (key: string, newState: BoxState) => void
     },
     {
         lines : Line[],
@@ -25,7 +26,7 @@ type TUseDrawer= [
         deleteItem : () => void,
         addRelation : () => void,
         changeFields : (amount : number) => void,
-        addField : () => void
+        addField : (type : 'Buttom' | 'Top') => void
     }
 ]
 
@@ -33,7 +34,8 @@ export const useDrawer = (): TUseDrawer => {
 
     const [actionType, setActionType] = useState<ActionType>(ActionType.None);
 
-    const [focusBox, setFocusBox] = useState<Box | null>(null);
+    const [selectBox, setSelectBox] = useState<Box | null>(null);
+    const [selectLine, setSelectLine] = useState<Line | null>(null);
 
     const [focusEntity, setFocusEntity] = useState<Point | null>(null);
 
@@ -78,11 +80,19 @@ export const useDrawer = (): TUseDrawer => {
             checkAction();
         }
         if (boxes.find(e=>e.state.isSelect)) {
-            setFocusBox(boxes.find(e=>e.state.isSelect)!);
+            setSelectBox(boxes.find(e=>e.state.isSelect)!);
         } else {
-            setFocusBox(null);
+            setSelectBox(null);
         }
     }, [boxes]);
+
+    useEffect(() => {
+        if (lines.find(e=>e.state.isFocus)) {
+            setSelectLine(lines.find(e=>e.state.isFocus)!);
+        } else {
+            setSelectLine(null);
+        }
+    }, [lines]);
 
     useEffect(() => {
         if (actionType === ActionType.Draw) {
@@ -121,7 +131,7 @@ export const useDrawer = (): TUseDrawer => {
         if (!focusLine) return;
         if (focusEntity && focusLine.startPoint && focusLine.startPoint.box.uuid === focusEntity.box.uuid) {
             setLines(prev=>{
-                return prev.filter(e=>e.uuid!=focusLine.uuid);
+                return prev.filter(e=>e.uuid!==focusLine.uuid);
             })
         } else {
             setLines((prev) => {
@@ -173,13 +183,15 @@ export const useDrawer = (): TUseDrawer => {
         })
     }
     
-    const setBoxState = (key: number, newState: BoxState): void => {
+    const setBoxState = (key: string, newState: BoxState): void => {
         setBoxes(prev => {
             const temp = [...prev];
-            if (newState.isSelect) temp.filter((e, k) => k !== key).forEach(e => {
+            if (newState.isSelect) temp.filter((e) => e.uuid !== key).forEach(e => {
                 e.state.isSelect = false;
             })
-            temp[key].state = newState;
+
+            temp.find(e=>e.uuid===key)!.state = newState;
+
             return temp;
         })
         if (newState.isSelect) clearLineFocus();
@@ -202,18 +214,16 @@ export const useDrawer = (): TUseDrawer => {
         return null;
     }
 
+
     const deleteItem = () : void => {
-        // console.log(typeof getCurrentFocus() === typeof lines)
         const focus = getCurrentFocus();
         if (!focus) return;
         if ((focus as Box).state.title!==undefined) {
             setLines((prev)=>{
                 return prev.filter(e=>e.startPoint?.box.uuid!==focus.uuid && e.stopPoint?.box.uuid!==focus.uuid);
             })
-            setBoxes((prev)=>{
-                let temp = [...prev];
-                temp = temp.filter(e=>e.uuid!==focus.uuid);
-                return temp;
+        setBoxes((prev)=>{
+                return prev.filter(e=>e.uuid!==focus.uuid);
             })
         } else {
             setLines((prev)=>{
@@ -231,10 +241,51 @@ export const useDrawer = (): TUseDrawer => {
         })
     }
     const changeFields = (amount : number) : void => {
-
+        const focusBox = (getCurrentFocus() as Box);
+        if (!focusBox) return;
+        if (focusBox.state.title===undefined) return;
+        if (focusBox.state.entities.length > amount) {
+            removeField(focusBox);
+        }
+        else if (focusBox.state.entities.length < amount) {
+            addField('Buttom');
+        }
     }
-    const addField = () : void => {
 
+    const removeField = (target : Box) : void => {
+        setBoxes(prev=>{
+            const temp = [...prev];
+            temp.find(e=>e.uuid===target.uuid)!.state.entities = temp.find(e=>e.uuid===target.uuid)!.state.entities.slice(0, temp.find(e=>e.uuid===target.uuid)!.state.entities.length-1);
+            return temp;
+        })
+    }
+
+    const addField =  (type : 'Buttom' | 'Top', focusBox ?: Box) : void => {
+        const box = focusBox ? focusBox : (getCurrentFocus() as Box);
+        if (!box) return;
+        const refEntity = React.createRef<HTMLDivElement>();
+        switch (type) {
+            case 'Buttom' :
+                setBoxes(prev=>{
+                    const temp = [...prev];
+                    temp.find(e=>e.uuid===box.uuid)?.state.entities.push({
+                        text : "",
+                        ref : refEntity
+                    })
+                    return temp;
+                })
+                break;
+            case 'Top' :
+                setBoxes(prev=>{
+                    const temp = [...prev];
+                    temp.find(e=>e.uuid===box.uuid)?.state.entities.unshift({
+                        text : "",
+                        ref : refEntity
+                    })
+                    return temp;
+                })
+                break;
+        } 
     }
 
     return [
@@ -250,8 +301,8 @@ export const useDrawer = (): TUseDrawer => {
         },
         {
             Action : actionType,
-            BoxSelection : focusBox,
-            LineSelection : focusLine
+            BoxSelection : selectBox,
+            LineSelection : selectLine
         },
         clearSelection,
         {
