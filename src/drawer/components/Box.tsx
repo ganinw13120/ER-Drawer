@@ -1,9 +1,10 @@
-import React, { ReactElement, useEffect, useRef, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { Box, BoxState, Point, PointPosition, Position } from '../model/Drawer';
 import { v4 as uuidv4 } from 'uuid';
 import { useDrawerContext } from '../hooks/useDrawerContext';
+import ContentEditable, { ContentEditableEvent } from 'react-contenteditable'
 
-const pointHitbox : number = 16;
+const pointHitbox: number = 30;
 
 type BoxComponentProps = {
     data: Box
@@ -11,11 +12,12 @@ type BoxComponentProps = {
 }
 
 const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
+
+    const { pos: currentPos } = useDrawerContext();
+
     const [points, setPoints] = useState<Array<Point>>([]);
 
     const [state, setState] = useState<BoxState>(data.state);
-
-    const { pos: currentPos } = useDrawerContext();
 
     const [lastPos, setLastPos] = useState<Position>(currentPos);
 
@@ -53,28 +55,25 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
         _points.push({
             uuid: uuidv4(),
             isHover: false,
-            isShow: false,
             ref: TitleL,
             box: data,
             position: PointPosition.Left,
-            parentRef: data.title.ref
+            parentRef: state.title.ref
         })
         _points.push({
             uuid: uuidv4(),
             isHover: false,
-            isShow: false,
             ref: TitleR,
             position: PointPosition.Right,
-            parentRef: data.title.ref,
+            parentRef: state.title.ref,
             box: data
         })
-        data.entities.forEach(en => {
+        state.entities.forEach(en => {
             const L = React.createRef<SVGSVGElement>();
             const R = React.createRef<SVGSVGElement>();
             _points.push({
                 uuid: uuidv4(),
                 isHover: false,
-                isShow: false,
                 ref: L,
                 position: PointPosition.Left,
                 parentRef: en.ref,
@@ -83,7 +82,6 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
             _points.push({
                 uuid: uuidv4(),
                 isHover: false,
-                isShow: false,
                 ref: R,
                 position: PointPosition.Right,
                 parentRef: en.ref,
@@ -95,9 +93,9 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
 
     const generatePointElement = (): ReactElement[] => {
         const _points: ReactElement[] = [];
-        let sum = 0;
+        let sum = 10;
         let borderNoise = 0;
-        let borderNoiseAddup = 0.75;
+        let borderNoiseAddup = .65;
         points.forEach((e, key) => {
             const _onHoverPoint = () => {
                 onHoverPoint(e.uuid);
@@ -107,12 +105,12 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
             }
             const pos: Position = e.position === PointPosition.Left ? {
                 x: 0,
-                y: (e.parentRef.current!.clientHeight / 2) + sum + borderNoise,
+                y: sum + borderNoise,
             } : {
                 x: e.parentRef.current!.offsetWidth + borderNoiseAddup,
-                y: (e.parentRef.current!.clientHeight / 2) + sum + borderNoise,
+                y: sum + borderNoise,
             }
-            if (e.position===PointPosition.Right) sum += e.parentRef.current!.clientHeight;
+            if (e.position === PointPosition.Right) sum += e.parentRef.current!.clientHeight;
             borderNoise += borderNoiseAddup;
             _points.push(<PointComponent pos={pos} data={e} onHoverPoint={_onHoverPoint} onUnHoverPoint={_onUnHoverPoint} />);
         })
@@ -187,6 +185,23 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
             stopDrag();
         }
     }
+    const onChangeTitle = (event: ContentEditableEvent) => {
+        setState({
+            ...state,
+            title : {
+                ...state.title,
+                text : event.target.value
+            }
+        })
+    }
+    const onChangeEntity = (event: ContentEditableEvent, key : number) => {
+        let temp = [...state.entities];
+        temp[key].text = event.target.value;
+        setState({
+            ...state,
+            entities : temp
+        })
+    }
 
     return (
         <>
@@ -209,15 +224,29 @@ const BoxComponent: React.FC<BoxComponentProps> = ({ data, setBoxState }) => {
                 }}
             >
                 <div className={`box-inner-container ${state.isSelect && !state.isDragging ? 'box-select' : ''} ${state.isDragging ? 'box-dragging' : ''} `}>
-                    <div className='box-header' ref={data.title.ref}>
-                        {data.title.text}
+                    <div className='box-header' ref={state.title.ref}>
+                        {/* {data.title.text} */}
+                        <ContentEditable
+                            html={state.title.text ? state.title.text : ''}
+                            disabled={false} 
+                            onChange={onChangeTitle} 
+                            tagName='div'
+                            className='inp-field'
+                        />
                     </div>
                     {(() => {
                         const details: Array<ReactElement> = [];
-                        data.entities.forEach((entity, key) => {
+                        state.entities.forEach((entity, key) => {
                             details.push(<React.Fragment key={key}>
                                 <div className={`${key % 2 === 0 ? 'row-even' : 'row-odd'} box-detail`} ref={entity.ref}>
-                                    {entity.text}
+                                    {/* {entity.text} */}
+                                    <ContentEditable
+                                        html={entity.text}
+                                        disabled={false} 
+                                        onChange={(e) => {onChangeEntity(e, key)}} 
+                                        tagName='div'
+                                        className='inp-field'
+                                    />
                                 </div>
                             </React.Fragment>)
                         })
@@ -242,9 +271,8 @@ type PointComponentProps = {
 
 const PointComponent: React.FC<PointComponentProps> = ({ data, onHoverPoint, onUnHoverPoint, pos }) => {
     const pointR = 2.5;
-    const pointTranslateX = (pointHitbox / 2) - (pointR * 1.75);
     return (<>
-        <svg key={data.uuid} ref={data.ref} onMouseEnter={() => { onHoverPoint() }} onMouseLeave={() => { onUnHoverPoint() }} style={{ cursor: 'pointer', position: 'absolute', top: 0, zIndex: 10, width: `${pointR * pointHitbox}px`, height: `${pointR * pointHitbox}px`, transform: `translate(${pos.x - (pointR * pointTranslateX)}px, ${pos.y + (pointR)}px)` }}>
+        <svg key={data.uuid} ref={data.ref} onMouseEnter={() => { onHoverPoint() }} onMouseLeave={() => { onUnHoverPoint() }} style={{ padding: `${pointR * 3}px`,cursor: 'pointer', position: 'absolute', top: 0, zIndex: 10, width: `${pointHitbox}px`, height: `${pointHitbox}px`, transform: `translate(${pos.x - (pointHitbox / 2)}px, ${pos.y}px)` }}>
             {data.isHover && <circle cx={pointR * 4} cy={pointR * 4} r={pointR * 2} fill="#d99a9a" />}
         </svg>
     </>)
