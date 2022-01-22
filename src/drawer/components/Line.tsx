@@ -31,6 +31,7 @@ export type LinePathParameters = {
     stopPos: Position
     startPoint?: Point
     stopPoint?: Point
+    offset : Position
 }
 
 export const pathReservY: number = 10;
@@ -104,9 +105,6 @@ const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState }) => 
 
         let element: ReactElement[] = [];
 
-        console.log(data.startRef!.current!.getClientRects()[0])
-        console.log(data.startRef!.current!.getBoundingClientRect())
-
         const startPos = data.startRef?.current ? parseClientRectsToPosition(data.startRef.current!.getClientRects()[0], pointOffset, offset) : data.startPosition!
         const stopPos = data.stopRef?.current ? parseClientRectsToPosition(data.stopRef.current!.getClientRects()[0], pointOffset, offset) : data.stopPosition!
 
@@ -114,7 +112,8 @@ const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState }) => 
             startPos: startPos,
             stopPos: stopPos,
             startPoint: data.startPoint,
-            stopPoint: data.stopPoint
+            stopPoint: data.stopPoint,
+            offset : offset
         });
         const {startAngle, stopAngle} = linePath;
         let i = 0;
@@ -141,6 +140,7 @@ const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState }) => 
     }
 
     const onLineSelect = () => {
+        console.log('selecting...')
         setState({
             ...state,
             isFocus : true
@@ -149,7 +149,7 @@ const LineComponent: React.FC<LineComponentProps> = ({ data, setLineState }) => 
 
     const generateSvgLine = (path: string): ReactElement => {
         const color = data.state.isFocus ? LineColor.Blue : LineColor.Black;
-        return <><path onMouseDown={() => { onLineSelect() }} key={uuidv4()} d={path} stroke={color} fill="transparent" strokeWidth="2" /></>
+        return <><path onMouseDown={() => { onLineSelect() }} key={uuidv4()} d={path} stroke={color} fill="transparent" strokeWidth="3" /></>
     }
 
     return <>

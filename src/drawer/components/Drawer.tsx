@@ -25,8 +25,8 @@ const Drawer: React.FC<DrawerProps> = () => {
     useEffect(() => {
         lines.setLines([]);
         boxes.setBoxes([
-            generateBox('นักเรียน', ['รหัสนักเรียน', 'ชื่อจริง', 'นามสกุล', 'เบอร์โทร', 'วันเกิด']),
-            generateBox('นักเลง', ['รหัสนักเรียน', 'ชื่อจริง', 'นามสกุล', 'เบอร์โทร', 'วันเกิด', 'ที่อยู่']),
+            // generateBox('นักเรียน', ['รหัสนักเรียน', 'ชื่อจริง', 'นามสกุล', 'เบอร์โทร', 'วันเกิด']),
+            // generateBox('นักเลง', ['รหัสนักเรียน', 'ชื่อจริง', 'นามสกุล', 'เบอร์โทร', 'วันเกิด', 'ที่อยู่']),
             generateBox('Customer', ['cusomter_id', 'full_name', 'mobile_no', 'password', 'created_at', 'updated_at']),
             generateBox('Branch', ['branch_d', 'branch_name', 'branch_address', 'mobile_no', 'created_at', 'updated_at'])
         ]);
@@ -58,6 +58,7 @@ const Drawer: React.FC<DrawerProps> = () => {
     return (
         <>
             <Stat />
+            <a style={{position : 'absolute'}}>{userState.Action}</a>
             <ControlPanel {...panelFunc} userState={userState} />
             <DrawerContext.Provider value={{
                 pos: currentPos,

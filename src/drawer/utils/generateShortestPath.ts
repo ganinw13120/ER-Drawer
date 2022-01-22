@@ -1,5 +1,8 @@
 import { LinePathParameters, pathReservY, pathReservX, lineStartTickDistance } from "../components/Line";
 import { PointPosition, Position } from "../model/Drawer";
+import parseClientRectsToPosition from "./parseClientRectsToPosition";
+
+const debugCase = false;
 
 const generateShortestPath = (param: LinePathParameters): Position[] => {
     const {
@@ -7,6 +10,7 @@ const generateShortestPath = (param: LinePathParameters): Position[] => {
         stopPos,
         startPoint,
         stopPoint,
+        offset
     } = param;
     const path: Array<Array<Position>> = [];
     if (startPoint && stopPoint) {
@@ -15,27 +19,31 @@ const generateShortestPath = (param: LinePathParameters): Position[] => {
             (startPos.x - lineStartTickDistance >= stopPos.x + lineStartTickDistance && startPoint.position === PointPosition.Left && stopPoint.position === PointPosition.Right)
         ) {
             path.push(getSimplePath(param));
+            if (debugCase) console.log('Case 1');
         } else {
             if (startPoint.position === stopPoint.position) {
                 if (startPoint.position === PointPosition.Right) {
-
+                    if (debugCase) console.log('Case 2');
                     if (startPos.x > stopPos.x) {
                         path.push(
                             getRoundTopRight({
                                 startPos: stopPos,
                                 stopPos: startPos,
                                 startPoint: stopPoint,
-                                stopPoint: startPoint
+                                stopPoint: startPoint,
+                                offset : offset
                             }),
                             getRoundBottomRight({
                                 startPos: stopPos,
                                 stopPos: startPos,
                                 startPoint: stopPoint,
-                                stopPoint: startPoint
+                                stopPoint: startPoint,
+                                offset : offset
                             }),
                         )
                     }
                     else {
+                        if (debugCase) console.log('Case 3');
                         path.push(
                             getRoundTopRight(param),
                             getRoundBottomRight(param)
@@ -43,11 +51,13 @@ const generateShortestPath = (param: LinePathParameters): Position[] => {
                     }
                 } else {
                     if (startPos.x > stopPos.x) {
+                        if (debugCase) console.log('Case 4');
                         path.push(
                             getRoundBottomLeft(param),
                         )
                     }
                     else {
+                        if (debugCase) console.log('Case 5');
                         path.push(
                             getRoundBottomLeft(param)
                         )
@@ -56,26 +66,31 @@ const generateShortestPath = (param: LinePathParameters): Position[] => {
             }
             else if (startPoint.position !== stopPoint.position) {
                 if (startPoint.position === PointPosition.Left) {
+                    if (debugCase) console.log('Case 6');
                     path.push(
                         getRountUp(param),
                     )
                 } else {
+                    if (debugCase) console.log('Case 7');
                     path.push(
                         getRountUp({
                             startPos: stopPos,
                             stopPos: startPos,
                             startPoint: stopPoint,
-                            stopPoint: startPoint
+                            stopPoint: startPoint,
+                            offset : offset
                         }).reverse(),
                     )
                 }
             }
         }
     } else {
+        if (debugCase) console.log('Case 8');
         path.push(getSimplePath(param));
     }
 
     if (path.length === 0) {
+        if (debugCase) console.log('Case 0');
         path.push(getSimplePath(param)) /// Prevent Error (Test purpose)
     }
 
@@ -131,29 +146,28 @@ const getRoundBottomLeft = (param: LinePathParameters): Position[] => {
     const {
         startPos,
         stopPos,
-        startPoint,
         stopPoint,
+        offset
     } = param;
     const stopBox = stopPoint?.box;
-    const startBox = startPoint?.box;
     let checkPoints: Position[] = [];
-    const boxRect = stopBox?.ref.current?.getClientRects()[0];
-    const startBoxRect = startBox?.ref.current?.getClientRects()[0];
+    const boxPos = parseClientRectsToPosition(stopBox!.ref.current!.getClientRects()[0], 0, offset);
+    const boxRect = stopBox!.ref.current!.getClientRects()[0];
     /// 1.
     checkPoints.push({ x: startPos.x, y: startPos.y });
-    if (startPos.x + lineStartTickDistance >= boxRect!.x - pathReservX) {
+    if (startPos.x + lineStartTickDistance >= boxPos!.x - pathReservX) {
         /// 2.
         checkPoints.push({ x: startPos.x - pathReservX, y: startPos.y });
         /// 3.
-        checkPoints.push({ x: startPos.x - pathReservX, y: startBoxRect!.y + startBoxRect!.height });
+        checkPoints.push({ x: stopPos.x - pathReservX, y: startPos.y });
     }
     else {
         /// 2.
         checkPoints.push({ x: startPos.x - pathReservX, y: startPos.y });
         /// 3.
-        checkPoints.push({ x: startPos.x - pathReservX, y: (boxRect!.y + boxRect!.height) + pathReservY });
+        checkPoints.push({ x: startPos.x - pathReservX, y: (boxPos!.y + boxRect!.height) + pathReservY });
         /// 4.
-        checkPoints.push({ x: stopPos.x - pathReservX, y: (boxRect!.y + boxRect!.height) + pathReservY });
+        checkPoints.push({ x: stopPos.x - pathReservX, y: (boxPos!.y + boxRect!.height) + pathReservY });
     }
     /// 5.
     checkPoints.push({ x: stopPos.x - pathReservX, y: stopPos.y });
@@ -167,23 +181,24 @@ const getRoundTopRight = (param: LinePathParameters): Position[] => {
         startPos,
         stopPos,
         stopPoint,
+        offset
     } = param;
     let checkPoints: Position[] = [];
     const stopBox = stopPoint?.box;
-    const boxRect = stopBox?.ref.current?.getClientRects()[0];
+    const boxPos = parseClientRectsToPosition(stopBox!.ref.current!.getClientRects()[0], 0, offset);
     /// 1.
     checkPoints.push({ x: startPos.x, y: startPos.y });
-    if (startPos.x + lineStartTickDistance >= boxRect!.x - pathReservX) {
+    if (startPos.x + lineStartTickDistance >= boxPos!.x - pathReservX) {
         /// 2.
         checkPoints.push({ x: stopPos.x + pathReservX, y: startPos.y });
     }
     else {
         /// 2.
-        checkPoints.push({ x: boxRect!.x - pathReservX, y: startPos.y });
+        checkPoints.push({ x: boxPos!.x - pathReservX, y: startPos.y });
         /// 3.
-        checkPoints.push({ x: boxRect!.x - pathReservX, y: boxRect!.y - pathReservY });
+        checkPoints.push({ x: boxPos!.x - pathReservX, y: boxPos!.y - pathReservY });
         /// 4.
-        checkPoints.push({ x: stopPos.x + pathReservX, y: boxRect!.y - pathReservY });
+        checkPoints.push({ x: stopPos.x + pathReservX, y: boxPos!.y - pathReservY });
     }
     /// 5.
     checkPoints.push({ x: stopPos.x + pathReservX, y: stopPos.y });
@@ -197,23 +212,25 @@ const getRoundBottomRight = (param: LinePathParameters): Position[] => {
         startPos,
         stopPos,
         stopPoint,
+        offset
     } = param;
     const stopBox = stopPoint?.box;
     let checkPoints: Position[] = [];
+    const boxPos = parseClientRectsToPosition(stopBox!.ref.current!.getClientRects()[0], 0, offset);
     const boxRect = stopBox?.ref.current?.getClientRects()[0];
     /// 1.
     checkPoints.push({ x: startPos.x, y: startPos.y });
-    if (startPos.x + lineStartTickDistance >= boxRect!.x - pathReservX) {
+    if (startPos.x + lineStartTickDistance >= boxPos!.x - pathReservX) {
         /// 2.
         checkPoints.push({ x: stopPos.x + pathReservX, y: startPos.y });
     }
     else {
         /// 2.
-        checkPoints.push({ x: boxRect!.x - pathReservX, y: startPos.y });
+        checkPoints.push({ x: boxPos!.x - pathReservX, y: startPos.y });
         /// 3.
-        checkPoints.push({ x: boxRect!.x - pathReservX, y: (boxRect!.y + boxRect!.height) + pathReservY });
+        checkPoints.push({ x: boxPos!.x - pathReservX, y: (boxPos!.y + boxRect!.height) + pathReservY });
         /// 4.
-        checkPoints.push({ x: stopPos.x + pathReservX, y: (boxRect!.y + boxRect!.height) + pathReservY });
+        checkPoints.push({ x: stopPos.x + pathReservX, y: (boxPos!.y + boxRect!.height) + pathReservY });
     }
     /// 5.
     checkPoints.push({ x: stopPos.x + pathReservX, y: stopPos.y });
@@ -228,8 +245,10 @@ const getRountUp = (param: LinePathParameters): Position[] => {
         startPos,
         stopPos,
         startPoint,
+        offset
     } = param;
     const startBox = startPoint?.box;
+    const boxPos = parseClientRectsToPosition(startBox!.ref.current!.getClientRects()[0], 0, offset);
     const startBoxRect = startBox?.ref.current?.getClientRects()[0];
     let checkPoints: Position[] = [];
 
@@ -241,18 +260,17 @@ const getRountUp = (param: LinePathParameters): Position[] => {
 
     if (startPos.y < stopPos.y) {
         /// 3.
-        checkPoints.push({ x: startPos.x - pathReservX, y: startBoxRect!.y + startBoxRect!.height + pathReservY })
+        checkPoints.push({ x: startPos.x - pathReservX, y: boxPos!.y + startBoxRect!.height + pathReservY })
 
         /// 4.
-        checkPoints.push({ x: stopPos.x + pathReservX, y: startBoxRect!.y + startBoxRect!.height + pathReservY })
+        checkPoints.push({ x: stopPos.x + pathReservX, y: boxPos!.y + startBoxRect!.height + pathReservY })
     }
     else {
         /// 3.
-        checkPoints.push({ x: startPos.x - pathReservX, y: startBoxRect!.y - pathReservY })
+        checkPoints.push({ x: startPos.x - pathReservX, y: boxPos!.y - pathReservY })
 
         /// 4.
-        checkPoints.push({ x: stopPos.x + pathReservX, y: startBoxRect!.y - pathReservY })
-
+        checkPoints.push({ x: stopPos.x + pathReservX, y: boxPos!.y - pathReservY })
     }
 
     /// 5.

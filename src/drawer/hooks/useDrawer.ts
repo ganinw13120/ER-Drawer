@@ -152,9 +152,8 @@ export const useDrawer = (): TUseDrawer => {
     }
 
     const clearSelection = (): void => {
-        setBoxes(prev => {
-            return prev.map(e => { e.state.isSelect = false; return e });
-        })
+        clearBoxesFocus();
+        clearLineFocus();
     }
 
     const clearBoxesFocus = () => {
